@@ -1,0 +1,70 @@
+{
+  "valid": {
+    "username": "test.user@hepsiburada.com",
+    "password": "TestPassword123!",
+    "email": "test.user@hepsiburada.com",
+    "firstName": "Test",
+    "lastName": "User",
+    "phoneNumber": "+905551234567"
+  },
+  "invalid": {
+    "username": "invalid.user@example.com",
+    "password": "wrongpassword",
+    "email": "invalid.email",
+    "emptyUsername": "",
+    "emptyPassword": "",
+    "shortPassword": "123"
+  },
+  "guest": {
+    "email": "guest.user@example.com",
+    "firstName": "Guest",
+    "lastName": "User",
+    "phoneNumber": "+905559876543"
+  },
+  "premium": {
+    "username": "premium.user@hepsiburada.com",
+    "password": "PremiumPassword123!",
+    "email": "premium.user@hepsiburada.com",
+    "membershipType": "premium"
+  },
+  "addresses": [
+    {
+      "title": "Home Address",
+      "firstName": "Test",
+      "lastName": "User",
+      "address": "Maslak Mahallesi, Büyükdere Caddesi No: 123",
+      "district": "Sarıyer",
+      "city": "İstanbul",
+      "postalCode": "34398",
+      "phoneNumber": "+905551234567"
+    },
+    {
+      "title": "Work Address", 
+      "firstName": "Test",
+      "lastName": "User",
+      "address": "Levent Mahallesi, Nispetiye Caddesi No: 456",
+      "district": "Beşiktaş",
+      "city": "İstanbul",
+      "postalCode": "34330",
+      "phoneNumber": "+905551234567"
+    }
+  ],
+  "paymentMethods": [
+    {
+      "type": "creditCard",
+      "cardNumber": "4111111111111111",
+      "expiryMonth": "12",
+      "expiryYear": "2025",
+      "cvv": "123",
+      "cardHolderName": "Test User"
+    },
+    {
+      "type": "debitCard",
+      "cardNumber": "5555555555554444",
+      "expiryMonth": "10",
+      "expiryYear": "2024",
+      "cvv": "456",
+      "cardHolderName": "Test User"
+    }
+  ]
+}

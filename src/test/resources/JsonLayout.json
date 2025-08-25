@@ -1,0 +1,60 @@
+{
+  "timestamp": {
+    "$resolver": "timestamp",
+    "pattern": {
+      "format": "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+      "timeZone": "Europe/Istanbul"
+    }
+  },
+  "level": {
+    "$resolver": "level",
+    "field": "name"
+  },
+  "thread": {
+    "$resolver": "thread",
+    "field": "name"
+  },
+  "logger": {
+    "$resolver": "logger",
+    "field": "name"
+  },
+  "message": {
+    "$resolver": "message",
+    "stringified": true
+  },
+  "mdc": {
+    "$resolver": "mdc",
+    "flatten": true,
+    "stringified": true
+  },
+  "ndc": {
+    "$resolver": "ndc",
+    "stringified": true
+  },
+  "exception": {
+    "$resolver": "exception",
+    "field": "stackTrace",
+    "stringified": true
+  },
+  "source": {
+    "class": {
+      "$resolver": "source",
+      "field": "className"
+    },
+    "method": {
+      "$resolver": "source", 
+      "field": "methodName"
+    },
+    "file": {
+      "$resolver": "source",
+      "field": "fileName"
+    },
+    "line": {
+      "$resolver": "source",
+      "field": "lineNumber"
+    }
+  },
+  "endOfBatch": {
+    "$resolver": "endOfBatch"
+  }
+}

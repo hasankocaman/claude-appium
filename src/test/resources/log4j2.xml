@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <!-- Properties for log file paths and patterns -->
+    <Properties>
+        <Property name="LOG_DIR">target/logs</Property>
+        <Property name="LOG_FILE">hepsiburada-mobile-automation</Property>
+        <Property name="CONSOLE_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</Property>
+        <Property name="FILE_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</Property>
+        <Property name="JSON_PATTERN">{"timestamp":"%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ}","level":"%level","thread":"%t","logger":"%logger","message":"%msg","exception":"%throwable"}%n</Property>
+    </Properties>
+
+    <Appenders>
+        <!-- Console Appender with color coding -->
+        <Console name="ConsoleAppender" target="SYSTEM_OUT">
+            <PatternLayout>
+                <Pattern>${CONSOLE_PATTERN}</Pattern>
+            </PatternLayout>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+        </Console>
+
+        <!-- All Logs File Appender -->
+        <RollingFile name="AllLogsAppender" 
+                     fileName="${LOG_DIR}/${LOG_FILE}-all.log"
+                     filePattern="${LOG_DIR}/${LOG_FILE}-all-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>${FILE_PATTERN}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="50MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+            <ThresholdFilter level="TRACE" onMatch="ACCEPT" onMismatch="DENY"/>
+        </RollingFile>
+
+        <!-- Error Logs File Appender -->
+        <RollingFile name="ErrorLogsAppender" 
+                     fileName="${LOG_DIR}/${LOG_FILE}-error.log"
+                     filePattern="${LOG_DIR}/${LOG_FILE}-error-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>${FILE_PATTERN}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="20MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+        </RollingFile>
+
+        <!-- Test Results Appender -->
+        <RollingFile name="TestResultsAppender" 
+                     fileName="${LOG_DIR}/${LOG_FILE}-tests.log"
+                     filePattern="${LOG_DIR}/${LOG_FILE}-tests-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>${FILE_PATTERN}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="30MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+        </RollingFile>
+
+        <!-- Performance Logs Appender -->
+        <RollingFile name="PerformanceLogsAppender" 
+                     fileName="${LOG_DIR}/${LOG_FILE}-performance.log"
+                     filePattern="${LOG_DIR}/${LOG_FILE}-performance-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>${FILE_PATTERN}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="20MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="15"/>
+        </RollingFile>
+
+        <!-- JSON Format Appender for Log Analysis -->
+        <RollingFile name="JsonLogsAppender" 
+                     fileName="${LOG_DIR}/${LOG_FILE}-json.log"
+                     filePattern="${LOG_DIR}/${LOG_FILE}-json-%d{yyyy-MM-dd}-%i.log.gz">
+            <JsonTemplateLayout eventTemplateUri="classpath:JsonLayout.json" />
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="50MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+        </RollingFile>
+
+        <!-- Async Appender for better performance -->
+        <Async name="AsyncConsole" shutdownTimeout="3000">
+            <AppenderRef ref="ConsoleAppender"/>
+            <BlockingQueueFactory>
+                <LinkedTransferQueue/>
+            </BlockingQueueFactory>
+        </Async>
+
+        <Async name="AsyncAllLogs" shutdownTimeout="5000">
+            <AppenderRef ref="AllLogsAppender"/>
+            <BlockingQueueFactory>
+                <LinkedTransferQueue/>
+            </BlockingQueueFactory>
+        </Async>
+    </Appenders>
+
+    <Loggers>
+        <!-- Hepsiburada Application Loggers -->
+        <Logger name="com.hepsiburada" level="DEBUG" additivity="false">
+            <AppenderRef ref="AsyncConsole"/>
+            <AppenderRef ref="AsyncAllLogs"/>
+            <AppenderRef ref="TestResultsAppender"/>
+        </Logger>
+
+        <!-- Page Object Loggers -->
+        <Logger name="com.hepsiburada.pages" level="INFO" additivity="false">
+            <AppenderRef ref="AsyncConsole"/>
+            <AppenderRef ref="AsyncAllLogs"/>
+            <AppenderRef ref="TestResultsAppender"/>
+        </Logger>
+
+        <!-- Step Definitions Loggers -->
+        <Logger name="com.hepsiburada.stepdefinitions" level="INFO" additivity="false">
+            <AppenderRef ref="AsyncConsole"/>
+            <AppenderRef ref="AsyncAllLogs"/>
+            <AppenderRef ref="TestResultsAppender"/>
+        </Logger>
+
+        <!-- Utility Classes Loggers -->
+        <Logger name="com.hepsiburada.utils" level="INFO" additivity="false">
+            <AppenderRef ref="AsyncConsole"/>
+            <AppenderRef ref="AsyncAllLogs"/>
+        </Logger>
+
+        <!-- Driver and Configuration Loggers -->
+        <Logger name="com.hepsiburada.drivers" level="INFO" additivity="false">
+            <AppenderRef ref="AsyncConsole"/>
+            <AppenderRef ref="AsyncAllLogs"/>
+        </Logger>
+
+        <Logger name="com.hepsiburada.config" level="INFO" additivity="false">
+            <AppenderRef ref="AsyncConsole"/>
+            <AppenderRef ref="AsyncAllLogs"/>
+        </Logger>
+
+        <!-- Performance Loggers -->
+        <Logger name="performance" level="INFO" additivity="false">
+            <AppenderRef ref="PerformanceLogsAppender"/>
+            <AppenderRef ref="JsonLogsAppender"/>
+        </Logger>
+
+        <!-- Third-party Library Loggers -->
+        
+        <!-- Appium Java Client -->
+        <Logger name="io.appium.java_client" level="WARN" additivity="false">
+            <AppenderRef ref="AllLogsAppender"/>
+        </Logger>
+
+        <!-- Selenium WebDriver -->
+        <Logger name="org.openqa.selenium" level="WARN" additivity="false">
+            <AppenderRef ref="AllLogsAppender"/>
+        </Logger>
+
+        <!-- Cucumber Loggers -->
+        <Logger name="io.cucumber" level="INFO" additivity="false">
+            <AppenderRef ref="AsyncConsole"/>
+            <AppenderRef ref="TestResultsAppender"/>
+        </Logger>
+
+        <!-- TestNG Loggers -->
+        <Logger name="org.testng" level="WARN" additivity="false">
+            <AppenderRef ref="AllLogsAppender"/>
+        </Logger>
+
+        <!-- Allure Loggers -->
+        <Logger name="io.qameta.allure" level="WARN" additivity="false">
+            <AppenderRef ref="AllLogsAppender"/>
+        </Logger>
+
+        <!-- ExtentReports Loggers -->
+        <Logger name="com.aventstack.extentreports" level="WARN" additivity="false">
+            <AppenderRef ref="AllLogsAppender"/>
+        </Logger>
+
+        <!-- Apache HTTP Client (if used) -->
+        <Logger name="org.apache.http" level="WARN" additivity="false">
+            <AppenderRef ref="AllLogsAppender"/>
+        </Logger>
+
+        <!-- Jackson JSON Processing -->
+        <Logger name="com.fasterxml.jackson" level="WARN" additivity="false">
+            <AppenderRef ref="AllLogsAppender"/>
+        </Logger>
+
+        <!-- Spring Framework (if used) -->
+        <Logger name="org.springframework" level="WARN" additivity="false">
+            <AppenderRef ref="AllLogsAppender"/>
+        </Logger>
+
+        <!-- Monte Screen Recorder -->
+        <Logger name="org.monte" level="WARN" additivity="false">
+            <AppenderRef ref="AllLogsAppender"/>
+        </Logger>
+
+        <!-- Root Logger Configuration -->
+        <Root level="INFO">
+            <AppenderRef ref="AsyncConsole"/>
+            <AppenderRef ref="AsyncAllLogs"/>
+            <AppenderRef ref="ErrorLogsAppender"/>
+        </Root>
+    </Loggers>
+</Configuration>

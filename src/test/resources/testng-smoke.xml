@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suite name="Hepsiburada Mobile Smoke Test Suite" verbose="1">
+    
+    <!-- Global Test Configuration for Smoke Tests -->
+    <parameter name="platform" value="Android"/>
+    <parameter name="environment" value="test"/>
+    <parameter name="testType" value="smoke"/>
+    
+    <!-- Listeners for enhanced reporting and logging -->
+    <listeners>
+        <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
+        <listener class-name="com.aventstack.extentreports.testng.listener.ExtentITestNGListener"/>
+    </listeners>
+
+    <!-- Critical Path Smoke Tests -->
+    <test name="Critical Path Smoke Tests" enabled="true">
+        <parameter name="priority" value="critical"/>
+        
+        <groups>
+            <run>
+                <include name="smoke"/>
+                <include name="critical"/>
+                <exclude name="ignore"/>
+            </run>
+        </groups>
+        
+        <classes>
+            <class name="com.hepsiburada.runners.SmokeTestRunner"/>
+        </classes>
+    </test>
+
+    <!-- MacBook Purchase Journey Smoke Test -->
+    <test name="MacBook Purchase Journey" enabled="true">
+        <parameter name="scenario" value="macbook-purchase"/>
+        
+        <groups>
+            <run>
+                <include name="smoke"/>
+                <include name="macbook"/>
+                <include name="cart"/>
+                <exclude name="ignore"/>
+            </run>
+        </groups>
+        
+        <classes>
+            <class name="com.hepsiburada.runners.TestNGCucumberRunner">
+                <methods>
+                    <include name="scenarios"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+    <!-- Search Functionality Smoke Test -->
+    <test name="Search Functionality" enabled="true">
+        <parameter name="scenario" value="search"/>
+        
+        <groups>
+            <run>
+                <include name="smoke"/>
+                <include name="search"/>
+                <exclude name="ignore"/>
+            </run>
+        </groups>
+        
+        <classes>
+            <class name="com.hepsiburada.runners.TestNGCucumberRunner">
+                <methods>
+                    <include name="scenarios"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+</suite>

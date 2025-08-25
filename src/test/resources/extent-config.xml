@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extentreports>
+    <!-- Report Theme: DARK, STANDARD -->
+    <configuration>
+        <!-- Report Title -->
+        <theme>STANDARD</theme>
+        
+        <!-- Document Title -->
+        <documentTitle>Hepsiburada Mobile Test Automation Report</documentTitle>
+        
+        <!-- Report Name -->
+        <reportName>Hepsiburada Mobile App Test Results</reportName>
+        
+        <!-- Time Zone -->
+        <timeZone>Europe/Istanbul</timeZone>
+        
+        <!-- Encoding -->
+        <encoding>UTF-8</encoding>
+        
+        <!-- Enable Offline Mode -->
+        <offline>false</offline>
+        
+        <!-- Enable Screenshots -->
+        <thumbnailForBase64>true</thumbnailForBase64>
+        
+        <!-- JavaScript and CSS customizations -->
+        <scripts>
+            <script>
+                // Custom JavaScript can be added here
+                console.log('Hepsiburada Mobile Test Report Loaded');
+            </script>
+        </scripts>
+        
+        <styles>
+            <style>
+                /* Custom CSS for branding */
+                .brand-logo {
+                    content: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjQwIiB2aWV3Qm94PSIwIDAgMTAwIDQwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik0xMCAyMEwzMCAyME0zMCAyMEw1MCAyME01MCAyMEw3MCAyMCIgc3Ryb2tlPSIjZmY2MDAwIiBzdHJva2Utd2lkdGg9IjIiLz48L3N2Zz4=');
+                }
+                
+                .navbar-brand {
+                    font-size: 18px !important;
+                    font-weight: bold;
+                    color: #ff6000 !important;
+                }
+                
+                .test-content .test-time-info {
+                    color: #666;
+                }
+                
+                .category-summary-body .category-summary-item {
+                    border-left: 4px solid #ff6000;
+                }
+            </style>
+        </styles>
+    </configuration>
+    
+    <!-- System Information -->
+    <system>
+        <info>
+            <name>Application</name>
+            <value>Hepsiburada Mobile App</value>
+        </info>
+        <info>
+            <name>Test Environment</name>
+            <value>Test</value>
+        </info>
+        <info>
+            <name>Test Framework</name>
+            <value>Appium + Cucumber + TestNG</value>
+        </info>
+        <info>
+            <name>Build Tool</name>
+            <value>Maven</value>
+        </info>
+        <info>
+            <name>Java Version</name>
+            <value>11</value>
+        </info>
+        <info>
+            <name>Automation Engineer</name>
+            <value>Hepsiburada Test Team</value>
+        </info>
+    </system>
+</extentreports>

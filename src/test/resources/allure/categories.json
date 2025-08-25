@@ -1,0 +1,74 @@
+[
+  {
+    "name": "Product Defects",
+    "description": "Failures caused by product defects or issues",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*AssertionError.*|.*ProductNotFound.*|.*ElementNotFound.*"
+  },
+  {
+    "name": "Test Defects",
+    "description": "Failures caused by test automation issues",
+    "matchedStatuses": ["failed", "broken"],
+    "messageRegex": ".*StaleElementReferenceException.*|.*NoSuchElementException.*|.*TimeoutException.*"
+  },
+  {
+    "name": "Environment Issues",
+    "description": "Failures caused by environment or infrastructure problems",
+    "matchedStatuses": ["failed", "broken"],
+    "messageRegex": ".*ConnectionException.*|.*NetworkException.*|.*AppiumServerException.*"
+  },
+  {
+    "name": "Driver Issues",
+    "description": "Failures caused by Appium driver or device issues",
+    "matchedStatuses": ["failed", "broken"],
+    "messageRegex": ".*WebDriverException.*|.*SessionNotCreatedException.*|.*DeviceNotFound.*"
+  },
+  {
+    "name": "Configuration Issues",
+    "description": "Failures caused by configuration or setup problems",
+    "matchedStatuses": ["failed", "broken"],
+    "messageRegex": ".*ConfigurationException.*|.*PropertyNotFoundException.*|.*FileNotFoundException.*"
+  },
+  {
+    "name": "Performance Issues",
+    "description": "Tests that failed due to performance thresholds being exceeded",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*Performance.*threshold.*exceeded.*|.*timeout.*"
+  },
+  {
+    "name": "Data Issues",
+    "description": "Failures caused by test data problems",
+    "matchedStatuses": ["failed", "broken"],
+    "messageRegex": ".*TestDataException.*|.*DataNotFoundException.*|.*InvalidDataFormat.*"
+  },
+  {
+    "name": "UI Element Issues",
+    "description": "Failures related to UI element interactions",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*ElementNotClickable.*|.*ElementNotVisible.*|.*InvalidSelector.*"
+  },
+  {
+    "name": "Cart Operations",
+    "description": "Failures related to shopping cart functionality",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*cart.*|.*Cart.*|.*shopping.*"
+  },
+  {
+    "name": "Search Operations",
+    "description": "Failures related to search functionality",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*search.*|.*Search.*|.*results.*"
+  },
+  {
+    "name": "Product Operations",
+    "description": "Failures related to product viewing and interaction",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*product.*|.*Product.*|.*MacBook.*"
+  },
+  {
+    "name": "Navigation Issues",
+    "description": "Failures related to app navigation and page transitions",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*navigation.*|.*Navigation.*|.*page.*transition.*"
+  }
+]

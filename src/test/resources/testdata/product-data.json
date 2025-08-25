@@ -1,0 +1,131 @@
+{
+  "macbook": {
+    "name": "MacBook Pro",
+    "brand": "Apple",
+    "model": "MacBook Pro 16-inch",
+    "category": "Laptop",
+    "specifications": {
+      "processor": "Apple M2 Pro",
+      "ram": "16GB",
+      "storage": "512GB SSD",
+      "screenSize": "16 inch",
+      "operatingSystem": "macOS"
+    },
+    "expectedFeatures": [
+      "Retina Display",
+      "Touch Bar",
+      "Force Touch",
+      "Backlit Keyboard",
+      "FaceTime HD Camera"
+    ],
+    "priceRange": {
+      "minimum": 25000,
+      "maximum": 100000,
+      "currency": "TL"
+    }
+  },
+  "validProducts": [
+    {
+      "name": "MacBook Pro 13-inch",
+      "brand": "Apple",
+      "category": "Laptop",
+      "searchKeyword": "MacBook Pro 13"
+    },
+    {
+      "name": "MacBook Pro 16-inch",
+      "brand": "Apple", 
+      "category": "Laptop",
+      "searchKeyword": "MacBook Pro 16"
+    },
+    {
+      "name": "MacBook Air",
+      "brand": "Apple",
+      "category": "Laptop",
+      "searchKeyword": "MacBook Air"
+    },
+    {
+      "name": "iMac",
+      "brand": "Apple",
+      "category": "Desktop",
+      "searchKeyword": "iMac 24"
+    },
+    {
+      "name": "iPhone 15 Pro",
+      "brand": "Apple",
+      "category": "Phone",
+      "searchKeyword": "iPhone 15 Pro"
+    }
+  ],
+  "productAttributes": {
+    "requiredFields": [
+      "title",
+      "price",
+      "brand",
+      "rating",
+      "image"
+    ],
+    "optionalFields": [
+      "originalPrice",
+      "discountPercentage",
+      "reviewCount",
+      "shippingInfo",
+      "sellerInfo",
+      "warranty"
+    ]
+  },
+  "cartOperations": {
+    "maxQuantity": 10,
+    "defaultQuantity": 1,
+    "quantityOptions": [1, 2, 3, 5, 10],
+    "addToCartTimeout": 5000,
+    "cartPageTimeout": 10000
+  },
+  "productValidation": {
+    "titleMinLength": 5,
+    "titleMaxLength": 200,
+    "priceFormat": "^[0-9,.]+ TL$",
+    "ratingRange": {
+      "min": 0,
+      "max": 5
+    },
+    "imageFormats": ["jpg", "jpeg", "png", "webp"],
+    "requiredButtons": [
+      "addToCart",
+      "addToFavorites",
+      "share"
+    ]
+  },
+  "comparisons": [
+    {
+      "product1": "MacBook Pro 13-inch",
+      "product2": "MacBook Pro 16-inch",
+      "compareBy": ["price", "screenSize", "performance"]
+    },
+    {
+      "product1": "MacBook Pro",
+      "product2": "MacBook Air", 
+      "compareBy": ["price", "weight", "batteryLife"]
+    }
+  ],
+  "recommendations": {
+    "basedOnViewed": true,
+    "basedOnPurchased": true,
+    "sameBrand": true,
+    "sameCategory": true,
+    "similarPrice": true
+  },
+  "inventory": {
+    "stockStatus": ["InStock", "OutOfStock", "LowStock", "PreOrder"],
+    "deliveryOptions": [
+      "Standard Delivery",
+      "Fast Delivery", 
+      "Same Day Delivery",
+      "Store Pickup"
+    ],
+    "warranties": [
+      "1 Year Manufacturer Warranty",
+      "2 Year Extended Warranty",
+      "Apple Care+"
+    ]
+  }
+}

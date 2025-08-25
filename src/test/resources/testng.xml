@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suite name="Hepsiburada Mobile Test Automation Suite" verbose="1">
+    
+    <!-- Global Test Configuration -->
+    <parameter name="platform" value="Android"/>
+    <parameter name="environment" value="test"/>
+    <parameter name="browser" value="NotApplicable"/>
+    
+    <!-- Listeners for enhanced reporting and logging -->
+    <listeners>
+        <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
+        <listener class-name="com.aventstack.extentreports.testng.listener.ExtentITestNGListener"/>
+    </listeners>
+
+    <!-- Smoke Test Suite -->
+    <test name="Smoke Tests" enabled="true">
+        <parameter name="testType" value="smoke"/>
+        
+        <groups>
+            <run>
+                <include name="smoke"/>
+                <exclude name="ignore"/>
+            </run>
+        </groups>
+        
+        <classes>
+            <class name="com.hepsiburada.runners.TestNGCucumberRunner">
+                <methods>
+                    <include name="scenarios"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+    <!-- Regression Test Suite -->
+    <test name="Regression Tests" enabled="true">
+        <parameter name="testType" value="regression"/>
+        
+        <groups>
+            <run>
+                <include name="regression"/>
+                <exclude name="ignore"/>
+                <exclude name="performance"/> <!-- Exclude performance tests from regular regression -->
+            </run>
+        </groups>
+        
+        <classes>
+            <class name="com.hepsiburada.runners.TestNGCucumberRunner">
+                <methods>
+                    <include name="scenarios"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+    <!-- End-to-End Test Suite -->
+    <test name="End-to-End Tests" enabled="false"> <!-- Disabled by default, enable as needed -->
+        <parameter name="testType" value="e2e"/>
+        
+        <groups>
+            <run>
+                <include name="e2e"/>
+                <include name="end-to-end"/>
+                <exclude name="ignore"/>
+            </run>
+        </groups>
+        
+        <classes>
+            <class name="com.hepsiburada.runners.TestNGCucumberRunner">
+                <methods>
+                    <include name="scenarios"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+</suite>

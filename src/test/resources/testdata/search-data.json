@@ -1,0 +1,138 @@
+{
+  "macbook": {
+    "keyword": "MacBook Pro",
+    "category": "Bilgisayar",
+    "sortBy": "En Yüksek Fiyat",
+    "filters": {
+      "brand": "Apple",
+      "screenSize": "16 inch",
+      "processor": "M2",
+      "ram": "16GB"
+    },
+    "expectedResults": {
+      "minimumCount": 1,
+      "containsKeywords": ["MacBook", "Pro", "Apple"]
+    }
+  },
+  "validSearchTerms": [
+    {
+      "keyword": "MacBook Pro",
+      "expectedMinResults": 1,
+      "category": "Bilgisayar"
+    },
+    {
+      "keyword": "MacBook Air", 
+      "expectedMinResults": 1,
+      "category": "Bilgisayar"
+    },
+    {
+      "keyword": "iMac",
+      "expectedMinResults": 1,
+      "category": "Bilgisayar"
+    },
+    {
+      "keyword": "iPhone",
+      "expectedMinResults": 5,
+      "category": "Telefon"
+    },
+    {
+      "keyword": "iPad",
+      "expectedMinResults": 3,
+      "category": "Tablet"
+    },
+    {
+      "keyword": "Apple Watch",
+      "expectedMinResults": 2,
+      "category": "Aksesuar"
+    }
+  ],
+  "invalidSearchTerms": [
+    {
+      "keyword": "InvalidProductXYZ123",
+      "expectedResults": 0,
+      "expectNoResults": true
+    },
+    {
+      "keyword": "xyzabc999",
+      "expectedResults": 0,
+      "expectNoResults": true
+    },
+    {
+      "keyword": "!@#$%^&*()",
+      "expectedResults": 0,
+      "expectNoResults": true
+    }
+  ],
+  "boundarySearchTerms": [
+    {
+      "keyword": "A",
+      "description": "Single character search",
+      "expectResults": true
+    },
+    {
+      "keyword": "AA", 
+      "description": "Two character search",
+      "expectResults": true
+    },
+    {
+      "keyword": "MacBook Pro 16 inch 2023 M2 Max Ultra Performance Laptop Computer",
+      "description": "Very long search term",
+      "expectResults": true
+    },
+    {
+      "keyword": "1234567890",
+      "description": "Numeric search",
+      "expectResults": false
+    },
+    {
+      "keyword": "SpecialCharacters!@#$%",
+      "description": "Special characters search",
+      "expectResults": false
+    }
+  ],
+  "sortOptions": [
+    {
+      "name": "En Yüksek Fiyat",
+      "value": "price_desc",
+      "description": "Sort by highest price"
+    },
+    {
+      "name": "En Düşük Fiyat", 
+      "value": "price_asc",
+      "description": "Sort by lowest price"
+    },
+    {
+      "name": "En Çok Satanlar",
+      "value": "bestseller",
+      "description": "Sort by best sellers"
+    },
+    {
+      "name": "En Yeni",
+      "value": "newest",
+      "description": "Sort by newest"
+    },
+    {
+      "name": "En Çok Değerlendirilen",
+      "value": "most_reviewed",
+      "description": "Sort by most reviewed"
+    }
+  ],
+  "filters": {
+    "brands": ["Apple", "Samsung", "Huawei", "Xiaomi", "LG"],
+    "priceRanges": [
+      {"min": 0, "max": 1000, "label": "0 - 1.000 TL"},
+      {"min": 1000, "max": 5000, "label": "1.000 - 5.000 TL"},
+      {"min": 5000, "max": 10000, "label": "5.000 - 10.000 TL"},
+      {"min": 10000, "max": 50000, "label": "10.000 - 50.000 TL"},
+      {"min": 50000, "max": null, "label": "50.000 TL ve üzeri"}
+    ],
+    "ratings": [1, 2, 3, 4, 5],
+    "shipping": ["Ücretsiz Kargo", "Hızlı Teslimat", "Aynı Gün Teslimat"]
+  },
+  "performanceThresholds": {
+    "searchTimeout": 10000,
+    "resultsLoadTimeout": 5000,
+    "sortTimeout": 3000,
+    "filterTimeout": 2000
+  }
+}
