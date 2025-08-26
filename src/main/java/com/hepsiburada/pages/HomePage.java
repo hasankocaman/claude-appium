@@ -18,10 +18,10 @@ import io.qameta.allure.Step;
 import org.openqa.selenium.WebElement;
 
 /**
- * HEPSİBURADA ANA SAYFA CLASS'I - MOBİL UYGULAMA ANA EKRANI
+ * HEPSİBURADA ANA page CLASS'I - MOBİL UYGULAMA ANA EKRANI
  * 
  * Bu class'ın projede rolü:
- * - Hepsiburada mobil uygulamadanın ana sayfa elements'lerini tanımlar
+ * - Hepsiburada mobil uygulamadanın ana page elements'lerini tanımlar
  * - Cross-platform element locators (Android + iOS)
  * - Home page specific actions ve navigations
  * - Product search functionality
@@ -30,7 +30,7 @@ import org.openqa.selenium.WebElement;
  * - Page validation ve state checking
  * 
  * Kullanılmazsa etki:
- * - Ana sayfa ile interaction yapılamaz
+ * - Ana page ile interaction yapılamaz
  * - Product search başlatılamaz
  * - Navigation operations eksik
  * - Home page validation missing
@@ -81,7 +81,7 @@ public class HomePage extends BasePage {
     
     // NAVIGATION ELEMENTS - ALT NAVİGASYON MENUSU ELEMENT'LERİ
     
-    // Home Tab: Ana sayfa navigation tab
+    // Home Tab: Ana page navigation tab
     // Android: bottomNavHome (bottom navigation home)
     // iOS: homeTab accessibility identifier
     // Bu element olmadan: Home page'e navigation yapılamaz
@@ -89,7 +89,7 @@ public class HomePage extends BasePage {
     @iOSXCUITFindBy(id = "homeTab")
     private WebElement homeTab;
     
-    // Categories Tab: Kategori sayfası navigation tab
+    // Categories Tab: Kategori pagesı navigation tab
     // Android: bottomNavCategories (categories navigation)
     // iOS: categoriesTab accessibility identifier
     // Bu element olmadan: Categories page navigation eksik
@@ -97,7 +97,7 @@ public class HomePage extends BasePage {
     @iOSXCUITFindBy(id = "categoriesTab")
     private WebElement categoriesTab;
     
-    // Cart Tab: Sepet sayfası navigation tab
+    // Cart Tab: Sepet pagesı navigation tab
     // Android: bottomNavCart (shopping cart navigation)
     // iOS: cartTab accessibility identifier
     // Bu element olmadan: Cart page access yapılamaz
@@ -105,7 +105,7 @@ public class HomePage extends BasePage {
     @iOSXCUITFindBy(id = "cartTab")
     private WebElement cartTab;
     
-    // Account Tab: Hesap sayfası navigation tab
+    // Account Tab: Hesap pagesı navigation tab
     // Android: bottomNavAccount (user account navigation)
     // iOS: accountTab accessibility identifier
     // Bu element olmadan: Account/profile page access eksik
@@ -113,9 +113,9 @@ public class HomePage extends BasePage {
     @iOSXCUITFindBy(id = "accountTab")
     private WebElement accountTab;
     
-    // MAIN CONTENT ELEMENTS - ANA SAYFA İÇERİK ELEMENT'LERİ
+    // MAIN CONTENT ELEMENTS - ANA page İÇERİK ELEMENT'LERİ
     
-    // Main Banner: Ana sayfa carousel/banner area
+    // Main Banner: Ana page carousel/banner area
     // Android: viewPagerBanner (ViewPager component for banners)
     // iOS: mainBanner accessibility identifier
     // Bu element olmadan: Main promotional banners validation yapılamaz
@@ -187,7 +187,7 @@ public class HomePage extends BasePage {
     // Cross-platform element strategy ile Android ve iOS support
     
     /**
-     * ANA SAYFA TAMAMEN YÜKLENME BEKLEM METODİ - BASEPAGE ABSTRACT İMPLEMENTASYONU
+     * ANA page TAMAMEN YÜKLENME BEKLEM METODİ - BASEPAGE ABSTRACT İMPLEMENTASYONU
      * 
      * Method amacı: Home page'in tamamen yüklenip kullanıma hazır hale gelmesini bekler
      * Override: BasePage abstract method implementation
@@ -242,7 +242,7 @@ public class HomePage extends BasePage {
     }
     
     /**
-     * ANA SAYFA YÜKLENME DURUMU DOĞRULAMA METODİ - BASEPAGE ABSTRACT İMPLEMENTASYONU
+     * ANA page YÜKLENME DURUMU DOĞRULAMA METODİ - BASEPAGE ABSTRACT İMPLEMENTASYONU
      * 
      * Method amacı: Home page'in loaded state'ini validate eder (boolean check)
      * Return değeri: boolean - true: page ready, false: page not loaded
@@ -315,7 +315,7 @@ public class HomePage extends BasePage {
     }
     
     /**
-     * ÜRÜN ARAMA METODİ - ANA SAYFA CORE FONKSİYON
+     * ÜRÜN ARAMA METODİ - ANA page CORE FONKSİYON
      * 
      * Method amacı: Belirtilen ürün için search operation yapar ve SearchResultsPage döner
      * Parametreler: searchTerm - Aranacak ürün adı/keyword (String)
@@ -392,14 +392,14 @@ public class HomePage extends BasePage {
     }
     
     /**
-     * KATEGORİ SAYFASI NAVİGASYON METODİ - ALT NAVİGASYON SEKMESİ
+     * KATEGORİ pageSI NAVİGASYON METODİ - ALT NAVİGASYON SEKMESİ
      * 
      * Method amacı: Bottom navigation'dan Categories sekmesine navigation yapar
      * Return değeri: CategoriesPage instance (page object pattern)
      * Navigation Pattern: Tab click + Page object return
      * 
      * Kullanılmazsa etki:
-     * - Kategori sayfasına navigation yapılamaz
+     * - Kategori pagesına navigation yapılamaz
      * - Category-based product browsing eksik
      * - E-commerce kategori discovery flow broken
      * - Category navigation test scenarios çalışmaz
@@ -452,7 +452,7 @@ public class HomePage extends BasePage {
     }
     
     /**
-     * SEPET SAYFASI NAVİGASYON METODİ - E-COMMERCE CART ACCESS
+     * SEPET pageSI NAVİGASYON METODİ - E-COMMERCE CART ACCESS
      * 
      * Method amacı: Bottom navigation'dan Shopping Cart sekmesine navigation yapar
      * Return değeri: CartPage instance (page object pattern)
@@ -517,14 +517,14 @@ public class HomePage extends BasePage {
     }
     
     /**
-     * HESAP SAYFASI NAVİGASYON METODİ - KULLANICI PROFİLİ ACCESS
+     * HESAP pageSI NAVİGASYON METODİ - KULLANICI PROFİLİ ACCESS
      * 
      * Method amacı: Bottom navigation'dan Account/Profile sekmesine navigation yapar
      * Return değeri: AccountPage instance (page object pattern)
      * User Management Pattern: Profile, settings, account operations
      * 
      * Kullanılmazsa etki:
-     * - User account sayfasına access yapılamaz
+     * - User account pagesına access yapılamaz
      * - Profile management operations eksik
      * - Account settings navigation broken
      * - User authentication flows test edilemez
@@ -628,12 +628,12 @@ public class HomePage extends BasePage {
     /**
      * MAIN BANNER GÖRÜNÜRLÜK KONTROL METODİ - PROMOSYON İÇERİK VALİDASYONU
      * 
-     * Method amacı: Ana sayfa main banner/carousel element'ının görünürlüğünü kontrol eder
+     * Method amacı: Ana page main banner/carousel element'ının görünürlüğünü kontrol eder
      * Return değeri: boolean - true: main banner visible, false: not visible
      * Marketing Content Pattern: Promotional content visibility check
      * 
      * Kullanılmazsa etki:
-     * - Ana sayfa promotional content validation yapılamaz
+     * - Ana page promotional content validation yapılamaz
      * - Marketing campaigns görünürlüğü test edilemez
      * - Home page visual content completeness check missing
      * - Banner-based navigation test scenarios eksik
@@ -671,7 +671,7 @@ public class HomePage extends BasePage {
     /**
      * CATEGORİES GRİD GÖRÜNÜRLÜK KONTROL METODİ - STRUKTUR KATEGORİ VALİDASYONU
      * 
-     * Method amacı: Ana sayfadaki categories grid layout'ının görünürlüğünü kontrol eder
+     * Method amacı: Ana pagedaki categories grid layout'ının görünürlüğünü kontrol eder
      * Return değeri: boolean - true: categories grid visible, false: not visible
      * E-commerce Structure Pattern: Category organization visibility
      * 
@@ -875,7 +875,7 @@ public class HomePage extends BasePage {
     /**
      * POPÜLER ÜRÜNLER BÖLÜMÜNE SCROLL METODİ - DİNAMİK İÇERİK KEŞFİ
      * 
-     * Method amacı: Ana sayfada popüler ürünler section'ına scroll yaparak görünür hale getirir
+     * Method amacı: Ana pageda popüler ürünler section'ına scroll yaparak görünür hale getirir
      * Return değeri: void - Action method, side effect (scroll operation)
      * Mobile Interaction Pattern: Vertical scrolling with target element detection
      * 

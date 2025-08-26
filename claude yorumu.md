@@ -32,17 +32,17 @@ Bu proje, Hepsiburada mobil uygulaması için kapsamlı bir mobil test otomasyon
 ### 3. Page Object Model Katmanı (`pages/`)
 
 #### `BasePage.java` (Abstract Base Class)
-- **Amaç**: Tüm sayfa sınıfları için temel fonksiyonalite
+- **Amaç**: Tüm page sınıfları için temel fonksiyonalite
 - **Sorumluluk**: Ortak element işlemleri, bekleme mekanizmaları
-- **OOP İlişkisi**: **Kalıtım (Inheritance)** - diğer tüm sayfa sınıfları bu sınıftan türer
+- **OOP İlişkisi**: **Kalıtım (Inheritance)** - diğer tüm page sınıfları bu sınıftan türer
 
-#### Konkret Sayfa Sınıfları
+#### Konkret page Sınıfları
 - `HomePage.java`
 - `SearchResultsPage.java`
 - `ProductDetailsPage.java`
 - `CartPage.java`
 
-**OOP İlişkisi**: Tüm sayfa sınıfları `BasePage`'den **miras alır** ve ortak fonksiyonaliteleri kullanır.
+**OOP İlişkisi**: Tüm page sınıfları `BasePage`'den **miras alır** ve ortak fonksiyonaliteleri kullanır.
 
 ### 4. Utility Katmanı (`utils/`)
 
@@ -92,8 +92,8 @@ BaseTest (Abstract)
 
 ### 2. Kompozisyon İlişkileri
 
-- **Page Sınıfları → DriverManager**: Her sayfa sınıfı driver'a erişim için DriverManager'ı kullanır
-- **Step Definitions → Page Objects**: Step definition'lar sayfa nesnelerini kullanır
+- **Page Sınıfları → DriverManager**: Her page sınıfı driver'a erişim için DriverManager'ı kullanır
+- **Step Definitions → Page Objects**: Step definition'lar page nesnelerini kullanır
 - **Test Runners → Step Definitions**: Runner'lar step definition'ları koordine eder
 
 ### 3. Dependency Injection
@@ -105,7 +105,7 @@ BaseTest (Abstract)
 ### 4. Factory Pattern Kullanımı
 
 - `DriverFactory`: Platform'a göre driver üretimi
-- Potansiyel `PageFactory`: Sayfa nesnelerinin üretimi
+- Potansiyel `PageFactory`: page nesnelerinin üretimi
 - `TestDataFactory`: Test verilerinin üretimi
 
 ## Projenin Genel İşleyişi
@@ -119,8 +119,8 @@ BaseTest (Abstract)
 ### 2. Test Yürütme Süreci
 1. **Feature Dosyası Okunur**: Cucumber feature file'ı parse edilir
 2. **Step Definitions Eşleşir**: Step'ler ilgili Java method'larıyla eşleşir
-3. **Page Objects Kullanılır**: Step'ler sayfa nesneleri üzerinden işlem yapar
-4. **Driver Commands**: Sayfa nesneleri Appium driver'ı kullanarak mobil uygulamayı kontrol eder
+3. **Page Objects Kullanılır**: Step'ler page nesneleri üzerinden işlem yapar
+4. **Driver Commands**: page nesneleri Appium driver'ı kullanarak mobil uygulamayı kontrol eder
 
 ### 3. Raporlama ve Cleanup
 1. **Screenshot/Video**: Hata durumunda görüntü/video kaydedilir

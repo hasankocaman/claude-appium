@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -17,11 +17,11 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        
-        <!-- Dependency Versions -->
-        <appium.version>9.3.0</appium.version>
+
+        <!-- UPDATED: Compatible Dependency Versions -->
+        <appium.version>8.6.0</appium.version>
         <selenium.version>4.15.0</selenium.version>
-        <cucumber.version>7.18.0</cucumber.version>
+        <cucumber.version>7.15.0</cucumber.version>
         <testng.version>7.8.0</testng.version>
         <allure.version>2.24.0</allure.version>
         <extent.version>5.1.1</extent.version>
@@ -31,10 +31,36 @@
         <aspectj.version>1.9.20</aspectj.version>
         <apache.commons.version>3.13.0</apache.commons.version>
         <slf4j.version>2.0.9</slf4j.version>
+        <!-- NEW: Cucumber Messages version for compatibility -->
+        <cucumber.messages.version>22.0.0</cucumber.messages.version>
+        <cucumber.gherkin.version>26.2.0</cucumber.gherkin.version>
     </properties>
 
+    <!-- NEW: Dependency Management for version control -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- Cucumber BOM for consistent versions -->
+            <dependency>
+                <groupId>io.cucumber</groupId>
+                <artifactId>cucumber-bom</artifactId>
+                <version>${cucumber.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Jackson BOM for consistent versions -->
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
-        <!-- Appium Java Client -->
+        <!-- Appium Java Client - DOWNGRADED for stability -->
         <dependency>
             <groupId>io.appium</groupId>
             <artifactId>java-client</artifactId>
@@ -62,30 +88,55 @@
             <version>${testng.version}</version>
         </dependency>
 
-        <!-- Cucumber Dependencies -->
+        <!-- Cucumber Dependencies - Using BOM for version management -->
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-java</artifactId>
-            <version>${cucumber.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-testng</artifactId>
-            <version>${cucumber.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-picocontainer</artifactId>
-            <version>${cucumber.version}</version>
         </dependency>
 
-        <!-- Allure Reporting -->
+        <!-- Cucumber JUnit support for JUnit runner -->
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-junit</artifactId>
+        </dependency>
+
+        <!-- JUnit 4 for Cucumber JUnit runner -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+        </dependency>
+
+        <!-- UPDATED: Allure Reporting with exclusions to prevent conflicts -->
         <dependency>
             <groupId>io.qameta.allure</groupId>
             <artifactId>allure-cucumber7-jvm</artifactId>
             <version>${allure.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.cucumber</groupId>
+                    <artifactId>gherkin</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.cucumber</groupId>
+                    <artifactId>messages</artifactId>
+                </exclusion>
+                <!-- Exclude potential conflicting versions -->
+                <exclusion>
+                    <groupId>io.cucumber</groupId>
+                    <artifactId>cucumber-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -94,7 +145,20 @@
             <version>${allure.version}</version>
         </dependency>
 
-        <!-- ExtentReports -->
+        <!-- NEW: Explicitly define compatible Cucumber Messages and Gherkin versions -->
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>messages</artifactId>
+            <version>${cucumber.messages.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>gherkin</artifactId>
+            <version>${cucumber.gherkin.version}</version>
+        </dependency>
+
+        <!-- ExtentReports - UPDATED version -->
         <dependency>
             <groupId>com.aventstack</groupId>
             <artifactId>extentreports</artifactId>
@@ -105,6 +169,13 @@
             <groupId>tech.grasshopper</groupId>
             <artifactId>extentreports-cucumber7-adapter</artifactId>
             <version>1.14.0</version>
+            <exclusions>
+                <!-- Prevent version conflicts -->
+                <exclusion>
+                    <groupId>io.cucumber</groupId>
+                    <artifactId>cucumber-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Logging -->
@@ -126,23 +197,20 @@
             <version>${log4j.version}</version>
         </dependency>
 
-        <!-- JSON Processing -->
+        <!-- JSON Processing - Using BOM for version management -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
 
         <!-- Apache Commons -->
@@ -208,7 +276,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Maven Surefire Plugin for TestNG -->
+            <!-- Maven Surefire Plugin for TestNG - UPDATED -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -223,7 +291,24 @@
                     <systemPropertyVariables>
                         <allure.results.directory>target/allure-results</allure.results.directory>
                     </systemPropertyVariables>
+                    <properties>
+                        <property>
+                            <name>dataproviderthreadcount</name>
+                            <value>5</value>
+                        </property>
+                    </properties>
+                    <!-- NEW: Parallel execution settings -->
+                    <parallel>methods</parallel>
+                    <threadCount>3</threadCount>
+                    <perCoreThreadCount>true</perCoreThreadCount>
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.aspectj</groupId>
+                        <artifactId>aspectjweaver</artifactId>
+                        <version>${aspectj.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
 
             <!-- Allure Maven Plugin -->
@@ -233,6 +318,8 @@
                 <version>2.12.0</version>
                 <configuration>
                     <reportVersion>${allure.version}</reportVersion>
+                    <resultsDirectory>target/allure-results</resultsDirectory>
+                    <reportDirectory>target/allure-report</reportDirectory>
                 </configuration>
             </plugin>
 
@@ -249,6 +336,11 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <argLine>
+                        -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar"
+                    </argLine>
+                </configuration>
             </plugin>
 
             <!-- Maven Resources Plugin -->
@@ -267,6 +359,24 @@
                 <artifactId>maven-clean-plugin</artifactId>
                 <version>3.3.1</version>
             </plugin>
+
+            <!-- NEW: Maven Dependency Plugin for conflict resolution -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <id>analyze</id>
+                        <goals>
+                            <goal>analyze-only</goal>
+                        </goals>
+                        <configuration>
+                            <failOnWarning>false</failOnWarning>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -279,6 +389,7 @@
             </activation>
             <properties>
                 <platform>android</platform>
+                <device.platform>Android</device.platform>
             </properties>
         </profile>
 
@@ -287,6 +398,7 @@
             <id>ios</id>
             <properties>
                 <platform>ios</platform>
+                <device.platform>iOS</device.platform>
             </properties>
         </profile>
 
@@ -324,6 +436,32 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+
+        <!-- NEW: Parallel execution profile -->
+        <profile>
+            <id>parallel</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <parallel>classes</parallel>
+                            <threadCount>4</threadCount>
+                            <perCoreThreadCount>false</perCoreThreadCount>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- NEW: Debug profile -->
+        <profile>
+            <id>debug</id>
+            <properties>
+                <maven.surefire.debug>-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005</maven.surefire.debug>
+            </properties>
         </profile>
     </profiles>
 </project>

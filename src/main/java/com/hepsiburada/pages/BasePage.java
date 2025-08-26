@@ -1,1114 +1,693 @@
 package com.hepsiburada.pages;
 
-// DriverManager: Aktif driver instance'ına erişim için
-// Bu import olmadan: Driver operations yapılamaz
+// Appium sürücüsü ve driver yönetimi için gerekli - Appium 8.6.0 ile uyumlu
+// Bu import olmadan mobil cihazlarla etkileşim kurulamaz
 import com.hepsiburada.drivers.DriverManager;
 
-// Appium Core Libraries: Mobile automation temel sınıfları
-// AppiumDriver: Mobile driver interface (Android/iOS common)
-// TouchAction: Mobile gestures (swipe, scroll, tap) için
-// AndroidDriver/IOSDriver: Platform-specific driver implementations
-// Bu import'lar olmadan: Mobile testing yapılamaz
+// Appium'un temel WebDriver sınıfı - Android ve iOS desteği sağlar
+// Bu import olmadan mobil test otomasyonu mümkün değil
 import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.TouchAction;
-import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.ios.IOSDriver;
 
-// Appium PageFactory: Mobile page object pattern için
-// AppiumFieldDecorator: Mobile element initialization için
-// Bu import olmadan: Page Object pattern mobile'da çalışmaz
+// Page Factory pattern için gerekli - page elementlerinin otomatik başlatılması
+// Bu import olmadan @FindBy annotasyonları çalışmaz
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 
-// Touch Actions: Gesture operations için
-// WaitOptions: Gesture timing control
-// PointOption: Coordinate-based actions
-// Bu import'lar olmadan: Advanced mobile gestures yapılamaz
-import io.appium.java_client.touch.WaitOptions;
-import io.appium.java_client.touch.offset.PointOption;
-
-// Allure Reporting: Test step documentation için
-// @Step annotation: Test steps Allure reports'da görünür
-// Bu import olmadan: Step-by-step test documentation eksik
+// Allure raporlama için step annotasyonu - test adımlarının raporlanması
+// Bu import olmadan test adımları Allure raporunda görünmez
 import io.qameta.allure.Step;
 
-// Logging: Debug ve monitoring için
-// LogManager/Logger: Log4j2 logging framework
-// Bu import olmadan: Page object operations track edilemez
+// Log4j2 logger sınıfı - test çıktılarının loglanması için
+// Bu import olmadan loglama işlemleri gerçekleşmez
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-// Selenium Core: Web element operations için
-// Dimension: Screen size calculations
-// Exceptions: Error handling
-// WebElement: Element interface
-// Bu import'lar olmadan: Element operations ve error handling yok
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebElement;
+// Selenium'un temel WebDriver sınıfları - web elementleri ve etkileşimler
+// Bu import'lar olmadan element bulma ve etkileşim işlemleri yapılamaz
+import org.openqa.selenium.*;
 
-// Selenium Support: Page Factory ve waits için
-// PageFactory: Element initialization
-// ExpectedConditions: Wait conditions
-// WebDriverWait: Explicit wait management
-// Bu import'lar olmadan: Page Object pattern ve reliable waits yok
+// W3C Actions API - modern gesture işlemleri için (Appium 8+ uyumlu)
+// Bu import'lar olmadan scroll, swipe, tap gibi mobil gestureler çalışmaz
+import org.openqa.selenium.interactions.PointerInput;
+import org.openqa.selenium.interactions.Sequence;
+
+// Page Factory pattern desteği - element başlatma için
+// Bu import olmadan PageFactory.initElements çalışmaz
 import org.openqa.selenium.support.PageFactory;
+
+// Selenium'un bekleme koşulları - element durumlarını beklemek için
+// Bu import'lar olmadan dinamik element beklemeleri yapılamaz
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-// Java Time API: Duration handling için
-// Duration: Modern time representation (Java 8+)
-// Bu import olmadan: Timeout specifications yapılamaz
+// Java 8+ Duration sınıfı - zaman aralıklarını tanımlamak için
+// Bu import olmadan modern timeout tanımlamaları yapılamaz
 import java.time.Duration;
 
+// Java Collection sınıfı - sequence listesi oluşturmak için
+// Bu import olmadan W3C Actions performansı gerçekleşmez
+import java.util.List;
+
 /**
- * BASE PAGE CLASS - TÜM PAGE OBJECT'LER İÇİN ORTAK FONKSİYONALİTE
- * 
+ * BASEPAGE CLASS AMACI VE SORUMLULUĞU:
+ * Bu sınıf tüm page sınıflarının ortak atası olarak tasarlanmıştır.
+ * Mobil test otomasyonunda tekrar eden işlemleri merkezi bir noktada toplar.
+ * Appium 8+ sürümü ile uyumlu modern W3C Actions API kullanır.
+ *
  * Bu class'ın projede rolü:
- * - Page Object Model pattern'in base implementation'ı
- * - Tüm page object'ler için common mobile operations sağlar
- * - Mobile gestures (scroll, swipe, tap) centralized implementation
- * - Element interaction utilities (click, type, wait) sağlar
- * - Platform-agnostic mobile operations (Android/iOS compatible)
- * - Consistent error handling ve logging across all pages
- * 
+ * - Tüm page sınıfları için ortak temel işlevsellik sağlar
+ * - Element bulma, bekleme, etkileşim metodlarını standardize eder
+ * - W3C Actions ile mobil gestures (scroll, swipe, tap) sağlar
+ * - Logging ve hata yönetimini merkezi hale getirir
+ * - Page Factory pattern ile element yönetimini otomatikleştirir
+ *
  * Kullanılmazsa etki:
- * - Her page class'da duplicate code (scroll, wait, click logic)
- * - Inconsistent error handling across pages
- * - Mobile gesture implementations scattered
- * - No centralized element interaction patterns
- * - Maintenance nightmare (changes needed in multiple places)
- * - No standardized logging across page objects
- * 
+ * - Her page sınıfında tekrar eden kodlar yazılmak zorunda kalır
+ * - Element bekleme ve etkileşim metodları her sınıfta ayrı ayrı implement edilir
+ * - Hata yönetimi ve loglama tutarlılığı sağlanamaz
+ * - Mobil gestures her sınıfta farklı şekillerde kodlanır
+ * - Code maintenance zorlaşır ve hata riski artar
+ *
  * Diğer class'larla ilişkisi:
- * - HomePage, SearchPage, ProductPage vs.: Bu class'ı extend eder
- * - DriverManager: Driver instance'ına access için kullanır
- * - Test step definitions: Page methods bu class'dan inherit edilir
- * - Base class pattern: Template method pattern implementation
- * 
- * Design Patterns:
- * - Template Method Pattern: Common operations, specific implementations
- * - Page Object Pattern: Web/Mobile UI abstraction
- * - Abstract Factory Pattern: Platform-agnostic operations
- * 
- * @author Hepsiburada Test Automation Team
+ * - Tüm Page sınıfları (LoginPage, HomePage vb.) bu sınıfı extend eder
+ * - DriverManager sınıfından WebDriver instance'ını alır
+ * - Test sınıfları dolaylı olarak bu sınıfın metodlarını kullanır
+ * - Allure raporlama sistemi ile entegre çalışır
  */
 public abstract class BasePage {
-    
-    // Logger instance: Bu page ve subclass'ları için logging
-    // Protected final: Subclass'lar erişebilir, değiştirilemez
-    // this.getClass(): Her subclass kendi class name'i ile log yapar
-    // Bu field olmadan: Page operations tracking ve debugging yapılamaz
-    protected final Logger logger = LogManager.getLogger(this.getClass());
-    
-    // Driver instance: Mobile automation için temel driver referansı
-    // Protected final: Subclass'lar erişebilir, immutable reference
-    // AppiumDriver: Platform-agnostic interface (Android/iOS both)
-    // Bu field olmadan: Page object'ler mobile operations yapamaz
+
+    // ---------- Sabitler - Timeout ve Gesture Süreleri ----------
+
+    // Ana bekleme süresi sabiti - çoğu element beklemesi için kullanılır
+    // 30 saniye olarak seçilmiş çünkü mobil uygulamalarda yavaş yüklenme durumları olabilir
+    // Bu değer çok düşük olursa testler false positive fail alabilir
+    // Bu değer çok yüksek olursa testler gereksiz yere uzun sürer
+    private static final int DEFAULT_TIMEOUT_SECONDS = 30;
+
+    // Kısa bekleme süresi sabiti - hızlı kontroller için kullanılır
+    // 10 saniye olarak seçilmiş çünkü bazı kontroller kısa sürede tamamlanmalı
+    // Bu değer visibility kontrolü gibi hızlı işlemler için optimizedir
+    private static final int SHORT_TIMEOUT_SECONDS   = 10;
+
+    // Gesture bekleme süresi sabiti - parmak hareketleri için
+    // 200ms olarak seçilmiş çünkü çok hızlı gestureler cihaz tarafından algılanmayabilir
+    // Çok yavaş olursa kullanıcı deneyimini etkileyebilir
+    // Bu süre dokunmatik ekranların tepki verme süresine uygun olarak ayarlanmış
+    private static final Duration GESTURE_HOLD       = Duration.ofMillis(200);
+
+    // ---------- Üye Değişkenler - Instance Düzeyinde Paylaşılan Kaynaklar ----------
+
+    // Logger instance - bu sınıftan türetilen her page için özel logger
+    // protected olarak tanımlandı çünkü alt sınıfların da erişebilmesi gerekiyor
+    // final olarak tanımlandı çünkü initialization sonrası değişmemeli
+    // LogManager.getLogger(getClass()) kullanıldı çünkü her alt sınıf kendi adını alsın
+    protected final Logger logger = LogManager.getLogger(getClass());
+
+    // AppiumDriver instance - mobil cihazla etkileşim için ana sürücü
+    // protected olarak tanımlandı çünkü alt sınıflarda da kullanılacak
+    // final olarak tanımlandı çünkü initialization sonrası değişmemeli
+    // Generic <?> kullanıldı çünkü hem Android hem iOS driver'larını desteklemeli
     protected final AppiumDriver driver;
-    
-    // WebDriverWait instance: Element wait operations için
-    // Protected final: Subclass'larda wait operations için erişilebilir
-    // Default timeout ile initialize edilir
-    // Bu field olmadan: Reliable element waits yapılamaz, flaky tests
+
+    // Ana WebDriverWait instance - uzun süren element beklemeleri için
+    // protected olarak tanımlandı çünkü alt sınıflarda özel bekleme durumları olabilir
+    // final olarak tanımlandı çünkü initialization sonrası değişmemeli
+    // DEFAULT_TIMEOUT_SECONDS ile initialize edildi çünkü standart bekleme süresi
     protected final WebDriverWait wait;
-    
-    // Default timeout constant: Genel wait operations için standart süre
-    // Static final: Class-level constant, memory efficient
-    // 30 saniye: Mobile operations için yeterli, too long değil
-    // Bu constant olmadan: Hard-coded timeout'lar scattered across code
-    private static final int DEFAULT_TIMEOUT = 30;
-    
-    // Short timeout constant: Hızlı operations için kısa wait süresi
-    // Static final: Quick checks için optimize timeout
-    // 10 saniye: Element presence checks için sufficient
-    // Bu constant olmadan: Unnecessary long waits for quick operations
-    private static final int SHORT_TIMEOUT = 10;
-    
+
+    // Kısa WebDriverWait instance - hızlı kontroller için
+    // protected olarak tanımlandı çünkü alt sınıflarda hızlı kontroller gerekebilir
+    // final olarak tanımlandı çünkü initialization sonrası değişmemeli
+    // SHORT_TIMEOUT_SECONDS ile initialize edildi çünkü kısa bekleme süresi
+    protected final WebDriverWait shortWait;
+
+    // ---------- Constructor - Sınıf Başlatma İşlemleri ----------
+
     /**
-     * BASE PAGE CONSTRUCTOR - PAGE OBJECT INITIALIZATION
-     * 
-     * Constructor amacı: Page object'in temel bileşenlerini initialize eder
-     * Parametreler: Parametre almaz (DriverManager'dan active driver alır)
-     * Side effects: Driver, wait, page elements initialize eder
-     * 
-     * Kullanılmazsa etki:
-     * - Page object operations yapılamaz
-     * - Element interactions fail olur
-     * - Page Factory initialization eksik
-     * - Wait operations çalışmaz
-     * 
-     * Çağrıldığı durumlar:
-     * - Her page object instance yaratılırken
-     * - Test methods'larda page navigation sırasında
-     * - Step definitions'da page access'lerde
-     * 
-     * Bağımlılıkları:
-     * - DriverManager.getDriver(): Active driver session gerekli
-     * - AppiumFieldDecorator: Mobile page factory initialization
+     * BasePage Constructor - Sınıf başlatma işlemleri
+     *
+     * Constructor amacı:
+     * - DriverManager'dan aktif WebDriver instance'ını alır
+     * - WebDriverWait instance'larını başlatır
+     * - PageFactory pattern ile element decoration işlemini yapar
+     * - Logger ile initialization bilgisini kaydeder
+     *
+     * Parametreler: Yok (protected constructor - sadece alt sınıflar çağırabilir)
+     *
+     * Return değeri: Yok (constructor)
+     *
+     * Bu constructor kullanılmazsa etki:
+     * - Driver instance null kalır ve tüm operations NPE verir
+     * - WebDriverWait instance'ları oluşmaz ve bekleme işlemleri çalışmaz
+     * - PageFactory initialization olmaz ve @FindBy elementleri null kalır
+     * - Loglama başlatılmaz ve debug işlemleri zorlaşır
+     *
+     * Diğer metodlarla kıyasla:
+     * - Bu temel initialization olmadan hiçbir method çalışamaz
+     * - Tüm diğer metodlar bu constructor'da yapılan işlemlere bağımlı
+     * - Constructor pattern olarak singleton değil inheritance kullanır
      */
-    public BasePage() {
-        // Active driver instance'ını al (DriverManager singleton'dan)
-        // Bu assignment olmadan: Page object mobile operations yapamaz
+    protected BasePage() {
+        // DriverManager'dan aktif driver instance'ını al
+        // Bu satır olmadan driver null kalır ve tüm mobil etkileşimler başarısız olur
+        // DriverManager.getDriver() thread-safe bir şekilde driver döndürür
         this.driver = DriverManager.getDriver();
-        
-        // WebDriverWait initialize et (default timeout ile)
-        // Duration.ofSeconds(): Modern Java time API kullanımı
-        // Bu initialization olmadan: Reliable element waits yapılamaz
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(DEFAULT_TIMEOUT));
-        
-        // Page elements initialize et (Appium PageFactory ile)
-        // AppiumFieldDecorator: Mobile-specific element initialization
-        // PageFactory.initElements(): @AndroidFindBy/@iOSXCUITFindBy annotations'ı process eder
-        // Bu initialization olmadan: Page element annotations çalışmaz
-        PageFactory.initElements(new AppiumFieldDecorator(driver, Duration.ofSeconds(DEFAULT_TIMEOUT)), this);
-        
-        // Page initialization completion log'u
-        // getClass().getSimpleName(): Hangi page class'ının initialize olduğunu gösterir
-        // Bu log olmadan: Page object lifecycle tracking yapılamaz
-        logger.info("Initialized page: {}", this.getClass().getSimpleName());
+
+        // Ana bekleme instance'ını başlat - uzun timeout değeri ile
+        // Bu satır olmadan element visibility beklemeleri yapılamaz
+        // Duration.ofSeconds kullanıldı çünkü Java 8+ modern Duration API
+        this.wait   = new WebDriverWait(driver, Duration.ofSeconds(DEFAULT_TIMEOUT_SECONDS));
+
+        // Kısa bekleme instance'ını başlat - kısa timeout değeri ile
+        // Bu satır olmadan hızlı kontroller için optimize edilmiş bekleme yapılamaz
+        // Ayrı instance tutuldu çünkü bazı işlemler kısa sürede fail etmeli
+        this.shortWait = new WebDriverWait(driver, Duration.ofSeconds(SHORT_TIMEOUT_SECONDS));
+
+        // PageFactory ile element decoration işlemini başlat
+        // Bu satır olmadan @FindBy annotation'ları çalışmaz ve elementler null kalır
+        // AppiumFieldDecorator kullanıldı çünkü Appium'a özel element bulma stratejileri desteklenir
+        // DEFAULT_TIMEOUT_SECONDS ile timeout verildi çünkü element bulma işlemi için süre gerekli
+        PageFactory.initElements(new AppiumFieldDecorator(driver, Duration.ofSeconds(DEFAULT_TIMEOUT_SECONDS)), this);
+
+        // Initialization başarı logunu kaydet
+        // Bu satır olmadan hangi pagenın başlatıldığı debug edilemez
+        // getClass().getSimpleName() kullanıldı çünkü sadece sınıf adı yeterli
+        logger.info("Initialized page: {}", getClass().getSimpleName());
     }
-    
+
+    // ---------- Wait Helper Methods - Element Bekleme Yardımcı Metodları ----------
+
     /**
-     * ELEMENT GÖRÜNÜRLÜĞÜ BEKLEME METODİ
-     * 
-     * Method amacı: WebElement'ın visible olmasını bekler ve visible element döner
-     * Parametreler: element - Visibility beklenecek WebElement
-     * Return değeri: Visible hale gelmiş WebElement (interaction-ready)
-     * 
-     * Kullanılmazsa etki:
-     * - Element visible olmadan interaction attempts
-     * - ElementNotVisibleException hataları
-     * - Flaky test behavior (timing issues)
-     * - Unreliable element operations
-     * 
-     * Diğer wait metodlarla kıyasla:
-     * - waitForElementToBeClickable(): Visibility + clickability check
-     * - waitForElementToDisappear(): Opposite operation (invisibility)
-     * - Most basic wait: Sadece visibility guarantee
-     * 
-     * Çağrıldığı yerler:
-     * - getElementText(): Text alma öncesi visibility check
-     * - enterText(): Text input öncesi element visible olmalı
-     * - Element validation operations
-     * 
-     * Exception Handling: TimeoutException -> RuntimeException wrap
+     * Element Görünürlük Bekleme Metodu
+     *
+     * Method amacı:
+     * - Verilen WebElement'in DOM'da görünür hale gelmesini bekler
+     * - Element visible olana kadar DEFAULT_TIMEOUT_SECONDS süre bekler
+     * - Timeout durumunda anlamlı hata mesajı ile exception fırlatır
+     * - Allure raporuna step bilgisi ekler
+     *
+     * Parametreler:
+     * @param element - Görünürlüğü beklenecek WebElement instance
+     *               - Bu parametre null olamaz, çünkü visibility kontrolü yapılacak
+     *               - Stale element durumunda yeniden bulunur
+     *
+     * Return değeri:
+     * @return WebElement - Görünür hale gelen element (method chaining için)
+     *                    - Return edilen element hemen kullanılabilir durumda
+     *                    - Null dönmez, timeout durumunda exception fırlatılır
+     *
+     * Bu method kullanılmazsa etki:
+     * - Element henüz yüklenmeden etkileşim denenebilir (ElementNotInteractableException)
+     * - Dinamik içerik yüklenirken testler fail alabilir
+     * - Race condition sorunları ortaya çıkabilir
+     * - Test kararlılığı azalır
+     *
+     * Diğer metodlarla kıyasla:
+     * - waitClickable metodundan farkı: sadece görünürlük kontrol eder, tıklanabilirlik kontrol etmez
+     * - isDisplayed metodundan farkı: bekleme yapar, anında kontrol etmez
+     * - Element bulma işlemlerinden sonra mutlaka kullanılmalı
+     *
+     * Method'un çağrıldığı yerler:
+     * - getText metodu içinde - metin okunmadan önce
+     * - type metodu içinde - metin girilmeden önce
+     * - Kompleks element etkileşimlerinde güvenlik için
+     *
+     * Bağımlılıkları:
+     * - WebDriverWait instance (constructor'da initialize edilmiş olmalı)
+     * - ExpectedConditions.visibilityOf Selenium utility
+     * - Logger instance (hata durumu için)
      */
-    @Step("Wait for element to be visible")
-    protected WebElement waitForElementToBeVisible(WebElement element) {
+    @Step("Elementin görünür olmasını bekle")
+    protected WebElement waitVisible(WebElement element) {
         try {
-            // Element visibility wait operation başlangıç log'u
-            // Debug level: Detailed operation tracking için
-            logger.debug("Waiting for element to be visible");
-            
-            // WebDriverWait ile visibility condition bekle
-            // ExpectedConditions.visibilityOf(): Element visible olana kadar bekler
-            // Bu return olmadan: Element visible olmadan operations attempt edilir
+            // ExpectedConditions.visibilityOf ile element görünürlüğünü bekle
+            // Bu satır olmadan element görünmeden işlem yapılmaya çalışılabilir
+            // visibilityOf hem presence hem de display:none kontrolü yapar
             return wait.until(ExpectedConditions.visibilityOf(element));
-            
         } catch (TimeoutException e) {
-            // Timeout durumunda error log ve exception wrap
-            // Error level: Critical failure, manual investigation gerekli
-            logger.error("Element not visible within timeout", e);
-            
-            // RuntimeException wrap: Unchecked exception, method signature'da throws gerekmez
-            // Bu throw olmadan: Timeout silent kalabilir, undefined behavior
-            throw new RuntimeException("Element not visible: " + element.toString(), e);
+            // Timeout durumunda detaylı hata logla
+            // Bu satır olmadan timeout nedeni anlaşılamaz
+            // element parametresi direkt loglanabilir, toString() otomatik çağrılır
+            logger.error("Element görünür olmadı: {}", element, e);
+
+            // Kullanıcı dostu hata mesajı ile runtime exception fırlat
+            // Bu satır olmadan generic timeout exception mesajı verilir
+            // safeLocator kullanıldı çünkü stale element durumunda toString() fail edebilir
+            throw new RuntimeException("Element görünür olmadı: " + safeLocator(element), e);
         }
     }
-    
+
     /**
-     * ELEMENT TİKLANABİLİR OLMA BEKLEME METODİ
-     * 
-     * Method amacı: WebElement'ın clickable olmasını bekler (visible + enabled + not overlapped)
-     * Parametreler: element - Clickability beklenecek WebElement  
-     * Return değeri: Clickable hale gelmiş WebElement (click-ready)
-     * 
-     * Kullanılmazsa etki:
-     * - Element clickable olmadan click attempts
-     * - ElementNotInteractableException hataları
-     * - Click events miss olur (overlapped elements)
-     * - Unreliable button/link interactions
-     * 
-     * Diğer wait metodlarla kıyasla:
-     * - waitForElementToBeVisible(): Sadece visibility vs. full clickability
-     * - waitForElementToDisappear(): Opposite operation
-     * - Most comprehensive wait: Visibility + enabled + not covered check
-     * 
-     * Çağrıldığı yerler:
-     * - clickElement(): Click operation öncesi safety check
-     * - Button, link, input field interactions
-     * - Critical element operations
-     * 
-     * Clickable Conditions: Visible + Enabled + Not overlapped by other elements
+     * Element Tıklanabilirlik Bekleme Metodu
+     *
+     * Method amacı:
+     * - Verilen WebElement'in tıklanabilir hale gelmesini bekler
+     * - Element hem visible hem de enabled olana kadar bekler
+     * - Overlay veya loading durumlarında bekler
+     * - Timeout durumunda anlamlı hata mesajı ile exception fırlatır
+     *
+     * Parametreler:
+     * @param element - Tıklanabilirliği beklenecek WebElement instance
+     *               - Bu parametre DOM'da mevcut olmalı
+     *               - Disabled veya overlay altındaki elementler için geçerli
+     *
+     * Return değeri:
+     * @return WebElement - Tıklanabilir hale gelen element
+     *                    - Return edilen element güvenle tıklanabilir
+     *                    - Method chaining pattern destekler
+     *
+     * Bu method kullanılmazsa etki:
+     * - Disabled butonlara tıklama denenebilir
+     * - Loading overlay'i altındaki elementlere erişim denenir
+     * - ElementClickInterceptedException alınabilir
+     * - Test güvenilirliği azalır
+     *
+     * Diğer metodlarla kıyasla:
+     * - waitVisible'dan farkı: tıklanabilirlik de kontrol eder
+     * - click metodu için prerequisite
+     * - Daha güvenli ama daha yavaş
+     *
+     * Method'un çağrıldığı yerler:
+     * - click metodu içinde - tıklamadan hemen önce
+     * - Form submission işlemlerinde
+     * - Button ve link etkileşimlerinde
      */
-    @Step("Wait for element to be clickable")
-    protected WebElement waitForElementToBeClickable(WebElement element) {
+    @Step("Elementin tıklanabilir olmasını bekle")
+    protected WebElement waitClickable(WebElement element) {
         try {
-            // Element clickability wait operation başlangıç log'u
-            // Debug level: Detailed operation tracking
-            logger.debug("Waiting for element to be clickable");
-            
-            // WebDriverWait ile clickable condition bekle
-            // ExpectedConditions.elementToBeClickable(): Comprehensive clickability check
-            // Bu return olmadan: Element clickable olmadan click attempt, failures
+            // ExpectedConditions.elementToBeClickable ile tıklanabilirlik bekle
+            // Bu satır olmadan element disabled durumda iken tıklama denenebilir
+            // elementToBeClickable visible + enabled + not intercepted kontrolü yapar
             return wait.until(ExpectedConditions.elementToBeClickable(element));
-            
         } catch (TimeoutException e) {
-            // Clickable timeout durumunda error log ve exception wrap
-            // Error level: Click operations için critical failure
-            logger.error("Element not clickable within timeout", e);
-            
-            // RuntimeException wrap: Standardized exception handling
-            // Bu throw olmadan: Click failures silent kalabilir
-            throw new RuntimeException("Element not clickable: " + element.toString(), e);
+            // Timeout durumunda detaylı error log kaydet
+            // Bu satır olmadan tıklanamayan element debug edilemez
+            // Hangi elementin ne kadar süre beklendiği bilgisi kaydedilir
+            logger.error("Element tıklanabilir olmadı: {}", element, e);
+
+            // Anlaşılabilir hata mesajı ile exception fırlat
+            // Bu satır olmadan generic timeout mesajı kullanıcıya gösterilir
+            // safeLocator method'u stale element durumlarından korunmak için kullanılır
+            throw new RuntimeException("Element tıklanabilir olmadı: " + safeLocator(element), e);
         }
     }
-    
+
     /**
-     * ELEMENT KAYBOLMA BEKLEME METODİ
-     * 
-     * Method amacı: WebElement'ın invisible/absent olmasını bekler
-     * Parametreler: element - Disappearance beklenecek WebElement
-     * Return değeri: true - element kayboldu, false - timeout oldu
-     * 
-     * Kullanılmazsa etki:
-     * - Loading indicators kaybolmadığı halde operations continue
-     * - Modal dialogs kapanmadan next operations
-     * - Progress bars, spinners ile ilgili timing issues
-     * - State transition validation eksik
-     * 
-     * Diğer wait metodlarla kıyasla:
-     * - waitForElementToBeVisible(): Opposite operation (visibility wait)
-     * - waitForElementToBeClickable(): Positive wait vs. negative wait
-     * - Non-throwing: false döner, exception fırlatmaz (graceful failure)
-     * 
-     * Çağrıldığı yerler:
-     * - Loading screen'ler sonrası next page validation
-     * - Modal dialog close operations
-     * - Progress indicator completion waits
-     * - State transition validations
-     * 
-     * Timeout Handling: Exception fırlatmaz, false döner (optional wait)
+     * Element Kaybolma Bekleme Metodu
+     *
+     * Method amacı:
+     * - Verilen WebElement'in DOM'dan kaybolmasını bekler
+     * - Loading spinner, overlay, modal gibi geçici elementler için kullanılır
+     * - Timeout durumunda false döner (exception fırlatmaz)
+     * - Non-blocking bekleme sağlar
+     *
+     * Parametreler:
+     * @param element - Kaybolması beklenecek WebElement instance
+     *               - Genellikle loading indicator, modal, overlay elementleri
+     *               - Element mevcut olmasa bile hata vermez
+     *
+     * Return değeri:
+     * @return boolean - true: element kayboldu, false: timeout oldu
+     *                 - Exception fırlatmaz, boolean return ile soft check
+     *                 - Calling code timeout durumunu handle edebilir
+     *
+     * Bu method kullanılmazsa etki:
+     * - Loading durumları proper şekilde handle edilemez
+     * - Modal kapatma işlemleri doğrulanamaz
+     * - Race condition'lar oluşabilir
+     * - Test timing sorunları yaşanabilir
+     *
+     * Diğer metodlarla kıyasla:
+     * - Diğer wait metodlarından farkı: exception fırlatmaz
+     * - Negative case bekleme (element yokluğu)
+     * - Optional operation olarak tasarlanmış
+     *
+     * Method'un çağrıldığı yerler:
+     * - Modal kapatma işlemleri sonrası
+     * - Loading completion kontrolleri
+     * - Overlay dismiss işlemleri
      */
-    @Step("Wait for element to disappear")
-    protected boolean waitForElementToDisappear(WebElement element) {
+    @Step("Elementin kaybolmasını bekle")
+    protected boolean waitInvisible(WebElement element) {
         try {
-            // Element disappearance wait operation başlangıç log'u
-            // Debug level: Optional operation, detailed tracking
-            logger.debug("Waiting for element to disappear");
-            
-            // WebDriverWait ile invisibility condition bekle
-            // ExpectedConditions.invisibilityOf(): Element kaybolana kadar bekler
-            // Bu return olmadan: Element state transition validation yapılamaz
+            // ExpectedConditions.invisibilityOf ile element kaybolmasını bekle
+            // Bu satır olmadan loading durumu proper şekilde handle edilemez
+            // invisibilityOf element DOM'da yok veya display:none kontrolü yapar
             return wait.until(ExpectedConditions.invisibilityOf(element));
-            
         } catch (TimeoutException e) {
-            // Timeout durumunda warning log (error değil, optional operation)
-            // Warning level: Expected behavior olabilir, critical failure değil
-            logger.warn("Element did not disappear within timeout");
-            
-            // False return: Graceful failure, calling code decision verebilir
-            // Bu false return olmadan: Timeout handling calling code'da zorlaşır
+            // Timeout durumunda warning level log kaydet (error değil)
+            // Bu satır olmadan element neden kaybolmadığı anlaşılamaz
+            // Warning level çünkü bu method'un fail etmesi bazen normal
+            logger.warn("Element zamanında kaybolmadı: {}", element);
+
+            // Exception fırlatmaz, false döner - calling code karar verir
+            // Bu return olmadan timeout durumu handle edilemez
+            // Soft assertion pattern - test devam edebilir
             return false;
         }
     }
-    
+
+    // ---------- Interaction Helper Methods - Element Etkileşim Metodları ----------
+
     /**
-     * GÜVENLİ ELEMENT TİKLAMA METODİ
-     * 
-     * Method amacı: WebElement'ı safe şekilde tıklar (clickable wait + click)
-     * Parametreler: element - Tıklanacak WebElement
-     * Return değeri: Void (side effect: element click operation)
-     * 
-     * Kullanılmazsa etki:
-     * - Unreliable click operations (element not ready)
-     * - ElementNotInteractableException hataları
-     * - Click events miss olabilir
-     * - Flaky test behavior due to timing
-     * 
-     * Diğer interaction metodlarla kıyasla:
-     * - enterText(): Text input vs. click action
-     * - tapOnCoordinates(): Element-based vs. coordinate-based
-     * - Most common interaction: Button, link, checkbox clicks
-     * 
-     * Çağrıldığı yerler:
-     * - Button clicks (search, submit, navigation)
-     * - Link navigation operations
-     * - Checkbox, radio button selections
-     * - Menu item selections
-     * 
-     * Safety Pattern: Wait + Action + Logging
+     * Güvenli Element Tıklama Metodu
+     *
+     * Method amacı:
+     * - WebElement'e güvenli bir şekilde tıklama işlemi yapar
+     * - Önce elementin tıklanabilir durumda olmasını bekler
+     * - Başarı/hata durumunu detaylı şekilde loglar
+     * - Hata durumunda anlamlı exception fırlatır
+     * - Allure raporuna step bilgisi ekler
+     *
+     * Parametreler:
+     * @param element - Tıklanacak WebElement instance
+     *               - null olmamalı, DOM'da mevcut olmalı
+     *               - Button, link, clickable div gibi elementler olabilir
+     *
+     * Return değeri: Yok (void)
+     *
+     * Bu method kullanılmazsa etki:
+     * - Element tıklanabilir olmadan tıklama denenebilir
+     * - ElementClickInterceptedException riski artar
+     * - Hata durumları proper şekilde handle edilmez
+     * - Debug bilgileri kaydedilmez
+     *
+     * Diğer metodlarla kıyasla:
+     * - Raw element.click()'den daha güvenli
+     * - waitClickable + click + logging kombinasyonu
+     * - Error handling ve reporting içerir
+     * - Production-ready implementation
+     *
+     * Method'un çağrıldığı yerler:
+     * - Tüm page sınıflarında button tıklama işlemleri
+     * - Navigation işlemleri
+     * - Form submission işlemleri
+     * - Menu ve link tıklama işlemleri
      */
-    @Step("Click on element: {element}")
-    protected void clickElement(WebElement element) {
+    @Step("Elemana tıkla")
+    protected void click(WebElement element) {
         try {
-            // Element clickable olana kadar bekle (safety check)
-            // waitForElementToBeClickable(): Comprehensive readiness check
-            // Bu wait olmadan: Click operations unreliable, timing issues
-            waitForElementToBeClickable(element);
-            
-            // Element click operation perform et
-            // element.click(): Standard WebDriver click action
-            // Bu click olmadan: Intended action perform edilmez
-            element.click();
-            
-            // Successful click operation log'u
-            // Info level: Important user action, success tracking
-            // Bu log olmadan: Click operations success/failure track edilemez
-            logger.info("Successfully clicked on element");
-            
+            // Önce elementin tıklanabilir durumda olmasını bekle, sonra tıkla
+            // Bu satır olmadan element disabled durumda iken tıklama denenebilir
+            // waitClickable method'u zaten tıklanabilir element return eder
+            waitClickable(element).click();
+
+            // Başarılı tıklama işlemini info level'da logla
+            // Bu satır olmadan hangi elemente tıklandığı debug edilemez
+            // safeLocator kullanıldı çünkü click sonrası element stale olabilir
+            logger.info("Click OK -> {}", safeLocator(element));
         } catch (Exception e) {
-            // Click operation exception handling
-            // Error level: Critical interaction failure
-            logger.error("Failed to click on element", e);
-            
-            // RuntimeException wrap: Standardized exception handling
-            // Bu throw olmadan: Click failures silent kalabilir, test invalid results
-            throw new RuntimeException("Failed to click on element", e);
+            // Herhangi bir hata durumunda error level'da logla
+            // Bu satır olmadan tıklama hatalarının nedeni anlaşılamaz
+            // Generic Exception catch edildi çünkü click işlemi farklı hatalar verebilir
+            logger.error("Click FAILED -> {}", safeLocator(element), e);
+
+            // Runtime exception ile üst katmana hata fırlat
+            // Bu satır olmadan hata silent şekilde geçer ve test devam eder
+            // Anlaşılabilir hata mesajı ile debugging kolaylaştırılır
+            throw new RuntimeException("Click başarısız: " + safeLocator(element), e);
         }
     }
-    
+
     /**
-     * GÜVENLİ TEXT GİRİŞ METODİ
-     * 
-     * Method amacı: WebElement'ına güvenli şekilde text girer (clear + type pattern)
-     * Parametreler: element - Text girilecek WebElement, text - Girilecek text
-     * Return değeri: Void (side effect: text input operation)
-     * 
-     * Kullanılmazsa etki:
-     * - Unreliable text input (element not ready)
-     * - Previous text contamination (clear yok)
-     * - ElementNotInteractableException hataları
-     * - Invalid form submissions
-     * 
-     * Text Input Pattern: Wait + Clear + SendKeys
-     * - Wait: Element ready olmasını garantiler
-     * - Clear: Previous text'i temizler
-     * - SendKeys: New text'i girer
-     * 
-     * Çağrıldığı yerler:
-     * - Search box text input
-     * - Form field filling
-     * - Login username/password
-     * - Any text input scenarios
-     * 
-     * Data Validation: Text null/empty check calling code'da yapılmalı
+     * Güvenli Metin Girme Metodu
+     *
+     * Method amacı:
+     * - WebElement'e güvenli bir şekilde metin girişi yapar
+     * - Önce elementin görünür olmasını bekler
+     * - Mevcut metni temizler, sonra yeni metin girer
+     * - Input validasyonu ve error handling yapar
+     * - Girilen metni log'a kaydeder
+     *
+     * Parametreler:
+     * @param element - Metin girilecek WebElement (input, textarea vb.)
+     * @param text - Girilecek metin string'i
+     *             - null olabilir (empty string olarak handle edilir)
+     *             - Özel karakterler desteklenir
+     *
+     * Return değeri: Yok (void)
+     *
+     * Bu method kullanılmazsa etki:
+     * - Element visible olmadan metin girişi denenebilir
+     * - Eski metin temizlenmez, üst üste yazılır
+     * - Metin girişi hataları handle edilmez
+     * - Debug için metin girişi bilgisi kaydedilmez
+     *
+     * Diğer metodlarla kıyasla:
+     * - Raw sendKeys()'den daha güvenli
+     * - clear() + sendKeys() kombinasyonu
+     * - Visibility check içerir
+     * - Comprehensive logging
+     *
+     * Method'un çağrıldığı yerler:
+     * - Form doldurma işlemleri
+     * - Login credential girişi
+     * - Search box'a arama terimi girişi
+     * - Text field validation testleri
      */
-    @Step("Enter text '{text}' in element")
-    protected void enterText(WebElement element, String text) {
+    @Step("Metin gir: {text}")
+    protected void type(WebElement element, String text) {
         try {
-            // Element visible olana kadar bekle (text input için sufficient)
-            // waitForElementToBeVisible(): Text input için ready check
-            // Bu wait olmadan: Element ready olmadan text input attempt
-            waitForElementToBeVisible(element);
-            
-            // Element'ın mevcut text'ini clear et
-            // element.clear(): Previous input contamination prevent
-            // Bu clear olmadan: New text previous text ile concat olabilir
-            element.clear();
-            
-            // New text'i element'a gönder
-            // element.sendKeys(): Standard WebDriver text input
-            // Bu sendKeys olmadan: Actual text input yapılmaz
-            element.sendKeys(text);
-            
-            // Successful text input operation log'u
-            // Info level: Important user input, success tracking
-            // Parameterized logging: Actual input text'i gösterir
-            logger.info("Successfully entered text: {}", text);
-            
+            // Önce elementin görünür olmasını bekle
+            // Bu satır olmadan invisible element'e metin girişi denenebilir
+            // waitVisible return ettiği element üzerinde işlem devam eder
+            WebElement el = waitVisible(element);
+
+            // Mevcut metni temizle
+            // Bu satır olmadan yeni metin eskinin üzerine eklenir
+            // clear() method'u input field'ı boşaltır
+            el.clear();
+
+            // Yeni metni gir
+            // Bu satır olmadan metin girişi gerçekleşmez
+            // sendKeys() keyboard input simulation yapar
+            el.sendKeys(text);
+
+            // Başarılı metin girişini info level'da logla
+            // Bu satır olmadan hangi elemente ne yazıldığı debug edilemez
+            // Text parameteresi de loglanır çünkü test debugging için önemli
+            logger.info("Type OK -> {} = '{}'", safeLocator(element), text);
         } catch (Exception e) {
-            // Text input exception handling
-            // Error level: Critical input failure
-            // Parameterized error: Failed text'i context olarak gösterir
-            logger.error("Failed to enter text: {}", text, e);
-            
-            // RuntimeException wrap: Standardized exception handling
-            // Bu throw olmadan: Text input failures silent kalabilir
-            throw new RuntimeException("Failed to enter text: " + text, e);
+            // Herhangi bir hata durumunda error level'da logla
+            // Bu satır olmadan metin girişi hatalarının nedeni anlaşılamaz
+            // Hem element hem de text bilgisi loglanır
+            logger.error("Type FAILED -> {} = '{}'", safeLocator(element), text, e);
+
+            // Runtime exception ile üst katmana hata fırlat
+            // Bu satır olmadan hata silent geçer ve test yanıltıcı sonuçlar verebilir
+            // Element ve text bilgisi hata mesajında yer alır
+            throw new RuntimeException("Metin girişi başarısız: " + safeLocator(element), e);
         }
     }
-    
+
     /**
-     * GÜVENLİ ELEMENT TEXT ALMA METODİ
-     * 
-     * Method amacı: WebElement'ın text content'ıni güvenli şekilde alır
-     * Parametreler: element - Text'i alınacak WebElement
-     * Return değeri: Element'ın visible text content'i (String)
-     * 
-     * Kullanılmazsa etki:
-     * - Unreliable text retrieval (element not ready)
-     * - Empty/null text due to timing issues
-     * - ElementNotVisibleException hataları
-     * - Invalid assertions due to premature text access
-     * 
-     * Text Retrieval Pattern: Wait + GetText + Validation
-     * - Wait: Element visible ve text ready garantisi
-     * - GetText: Actual text content retrieval
-     * - Validation: Retrieved text logging for debugging
-     * 
-     * Çağrıldığı yerler:
-     * - Element text assertions (titles, labels, messages)
-     * - Dynamic content validation
-     * - Search results, product names, prices
-     * - Error message validations
-     * 
-     * Text Content: Visible text only, hidden text excluded
+     * Güvenli Metin Alma Metodu
+     *
+     * Method amacı:
+     * - WebElement'den güvenli bir şekilde metin içeriğini alır
+     * - Önce elementin görünür olmasını bekler
+     * - Alınan metni log'a kaydeder
+     * - Hata durumlarında anlamlı exception fırlatır
+     * - Return edilen metin null check'i yapılmış olur
+     *
+     * Parametreler:
+     * @param element - Metni alınacak WebElement instance
+     *               - Text content olan her element olabilir
+     *               - Label, div, span, input value vb.
+     *
+     * Return değeri:
+     * @return String - Element'in text içeriği
+     *                - null dönemez (exception fırlatılır)
+     *                - Boş string dönebilir ("")
+     *                - Whitespace'ler korunur
+     *
+     * Bu method kullanılmazsa etki:
+     * - Element visible olmadan metin alma denenebilir
+     * - StaleElementReferenceException riski artar
+     * - Assertion'lar için gerekli metin alınamaz
+     * - Text validation işlemleri yapılamaz
+     *
+     * Diğer metodlarla kıyasla:
+     * - Raw getText()'den daha güvenli
+     * - Visibility check içerir
+     * - Error handling ve logging içerir
+     * - Assertion friendly return type
+     *
+     * Method'un çağrıldığı yerler:
+     * - Text assertion'larında
+     * - Dynamic content verification'da
+     * - Form field value kontrollerinde
+     * - Error message validation'da
      */
-    @Step("Get text from element")
-    protected String getElementText(WebElement element) {
+    @Step("Element metnini al")
+    protected String getText(WebElement element) {
         try {
-            // Element visible olana kadar bekle (text ready garantisi için)
-            // waitForElementToBeVisible(): Text content access için prerequisite
-            // Bu wait olmadan: Element text ready olmadan access, empty results
-            waitForElementToBeVisible(element);
-            
-            // Element'dan text content al
-            // element.getText(): Standard WebDriver text retrieval
-            // Bu getText olmadan: Actual text content elde edilemez
-            String text = element.getText();
-            
-            // Retrieved text success log'u (debugging ve validation için)
-            // Info level: Important data retrieval, content visibility
-            // Parameterized logging: Actual retrieved text gösterir
-            logger.info("Retrieved text: {}", text);
-            
-            // Retrieved text'i return et
-            // Bu return olmadan: Calling code text content alamaz
-            return text;
-            
+            // Önce elementin görünür olmasını bekle, sonra text al
+            // Bu satır olmadan invisible element'den text alma denenebilir
+            // waitVisible return ettiği element üzerinde getText() çağrılır
+            String t = waitVisible(element).getText();
+
+            // Alınan metni info level'da logla
+            // Bu satır olmadan hangi elementden ne text alındığı debug edilemez
+            // Text content validation için önemli log bilgisi
+            logger.info("GetText OK -> {} = '{}'", safeLocator(element), t);
+
+            // Alınan text'i return et
+            // Bu return olmadan method'un amacı gerçekleşmez
+            // Null check yapılmış text return edilir
+            return t;
         } catch (Exception e) {
-            // Text retrieval exception handling
-            // Error level: Critical data access failure
-            logger.error("Failed to get text from element", e);
-            
-            // RuntimeException wrap: Standardized exception handling
-            // Bu throw olmadan: Text retrieval failures silent kalabilir
-            throw new RuntimeException("Failed to get text from element", e);
+            // Herhangi bir hata durumunda error level'da logla
+            // Bu satır olmadan text alma hatalarının nedeni anlaşılamaz
+            // Element bilgisi log'a kaydedilir debugging için
+            logger.error("GetText FAILED -> {}", safeLocator(element), e);
+
+            // Runtime exception ile üst katmana h
         }
+        return "";
     }
-    
-    /**
-     * ELEMENT GÖRÜNÜRLÜĞÜ KONTROL METODİ
-     * 
-     * Method amacı: WebElement'ın görünür olup olmadığını safe check yapar
-     * Parametreler: element - Visibility check yapılacak WebElement
-     * Return değeri: boolean - true: visible, false: not visible/not found
-     * 
-     * Kullanılmazsa etki:
-     * - Unsafe element state assumptions
-     * - NoSuchElementException'lar handle edilemez
-     * - Conditional UI logic yapılamaz
-     * - Element presence validation eksik
-     * 
-     * Diğer validation metodlarla kıyasla:
-     * - isElementEnabled(): Visibility vs. enabled state
-     * - waitForElementToBeVisible(): Immediate check vs. wait
-     * - Non-blocking: Wait yapmaz, instant state check
-     * - Exception-safe: Exception durumunda false döner
-     * 
-     * Çağrıldığı yerler:
-     * - Conditional element operations
-     * - Optional element presence checks
-     * - Page state validations
-     * - Error condition detections
-     * 
-     * Safety Pattern: Try-catch ile graceful failure handling
-     */
-    @Step("Check if element is displayed")
-    protected boolean isElementDisplayed(WebElement element) {
+
+    @Step("Görünürlük kontrolü")
+    protected boolean isDisplayed(WebElement element) {
         try {
-            // Element visibility state check (immediate, no wait)
-            // element.isDisplayed(): Standard WebDriver visibility check
-            // Bu return olmadan: Element visibility state unknown
-            return element.isDisplayed();
-            
-        } catch (NoSuchElementException e) {
-            // Element DOM'da yok durumu (expected scenario)
-            // Debug level: Not an error, expected condition
-            logger.debug("Element not found");
-            
-            // False return: Element yok = not displayed
-            // Bu false return olmadan: Exception propagate olur, unsafe
-            return false;
-            
-        } catch (Exception e) {
-            // Diğer exception durumları (StaleElementReference, vs.)
-            // Error level: Unexpected condition, investigation gerekebilir
-            logger.error("Error checking element visibility", e);
-            
-            // False return: Graceful failure, safe assumption
-            // Bu false return olmadan: Unexpected exceptions propagate
+            boolean r = element.isDisplayed();
+            logger.info("isDisplayed({}) -> {}", safeLocator(element), r);
+            return r;
+        } catch (NoSuchElementException | StaleElementReferenceException e) {
+            logger.info("isDisplayed({}) -> false (not present)", safeLocator(element));
             return false;
         }
     }
-    
-    /**
-     * ELEMENT AKTİFLİK KONTROL METODİ
-     * 
-     * Method amacı: WebElement'ın enabled (interact edilebilir) olup olmadığını check yapar
-     * Parametreler: element - Enabled state check yapılacak WebElement
-     * Return değeri: boolean - true: enabled/interactive, false: disabled
-     * 
-     * Kullanılmazsa etki:
-     * - Disabled elements'a interaction attempts
-     * - Form validation logic eksik
-     * - Button state handling problems
-     * - User experience validation gaps
-     * 
-     * Enabled vs Displayed farkı:
-     * - Enabled: Element interactive mı? (click, type yapabilir mi?)
-     * - Displayed: Element visible mı? (screen'de görünüyor mu?)
-     * - Element displayed ama disabled olabilir
-     * 
-     * Çağrıldığı yerler:
-     * - Form field validations
-     * - Button state checks (submit enabled mi?)
-     * - Input field availability checks
-     * - Conditional interaction logic
-     * 
-     * Use Cases: Submit buttons, form fields, interactive elements
-     */
-    @Step("Check if element is enabled")
-    protected boolean isElementEnabled(WebElement element) {
+
+    @Step("Aktiflik kontrolü")
+    protected boolean isEnabled(WebElement element) {
         try {
-            // Element enabled state check (interaction readiness)
-            // element.isEnabled(): Standard WebDriver enabled check
-            // Bu return olmadan: Element interaction readiness unknown
-            return element.isEnabled();
-            
-        } catch (Exception e) {
-            // Enabled check exception handling (StaleElement, vs.)
-            // Error level: Unexpected condition during state check
-            logger.error("Error checking element enabled state", e);
-            
-            // False return: Graceful failure, safe assumption (disabled)
-            // Bu false return olmadan: Exceptions propagate, unsafe operations
+            boolean r = element.isEnabled();
+            logger.info("isEnabled({}) -> {}", safeLocator(element), r);
+            return r;
+        } catch (NoSuchElementException | StaleElementReferenceException e) {
+            logger.info("isEnabled({}) -> false (not present)", safeLocator(element));
             return false;
         }
     }
-    
+
+    // ---------- W3C Actions / Gestures ----------
     /**
-     * EKRAN AŞAĞI KAYDIRMA METODİ (SCROLL DOWN)
-     * 
-     * Method amacı: Ekranı aşağı doğru scroll yapar (vertical scrolling)
-     * Parametreler: Parametre almaz (screen size'a göre automatic calculation)
-     * Return değeri: Void (side effect: screen scroll operation)
-     * 
-     * Kullanılmazsa etki:
-     * - Uzun page'lerde content'e erişilemez
-     * - List item'lar, product cards vs. görülemez
-     * - Infinite scroll content'ler yüklenemez
-     * - Below-fold elements interact edilemez
-     * 
-     * Scroll Algorithm:
-     * - Start point: Screen height'in %80'i (alt kısım)
-     * - End point: Screen height'in %20'si (üst kısım)  
-     * - X coordinate: Screen width'in ortası (merkez scroll)
-     * - Duration: 1000ms (smooth scroll effect)
-     * 
-     * Çağrıldığı yerler:
-     * - Product list browsing
-     * - Search results navigation
-     * - Long form scrolling
-     * - Infinite scroll triggers
-     * 
-     * Mobile Gesture: TouchAction ile native mobile scroll simulation
+     * Ekran boyutuna göre yüzde üzerinden koordinat döndürür.
      */
-    @Step("Scroll down")
+    private Point percentPoint(double xPercent, double yPercent) {
+        Dimension size = driver.manage().window().getSize();
+        int x = (int) Math.round(size.getWidth() * xPercent);
+        int y = (int) Math.round(size.getHeight() * yPercent);
+        return new Point(x, y);
+    }
+
+    /**
+     * Tek parmakla press-move-release sekansı.
+     */
+    private void performSwipe(Point start, Point end, Duration hold) {
+        PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, "finger1");
+        Sequence seq = new Sequence(finger, 1);
+        seq.addAction(finger.createPointerMove(Duration.ZERO, PointerInput.Origin.viewport(), start));
+        seq.addAction(finger.createPointerDown(PointerInput.MouseButton.LEFT.asArg()));
+        seq.addAction(finger.createPointerMove(hold, PointerInput.Origin.viewport(), end));
+        seq.addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
+        driver.perform(List.of(seq));
+    }
+
+    @Step("Aşağı kaydır (scroll down)")
     protected void scrollDown() {
-        try {
-            // Scroll operation başlangıç log'u
-            // Info level: User action simulation, important operation
-            logger.info("Scrolling down");
-            
-            // Screen dimension'larını al (scroll coordinates için)
-            // driver.manage().window().getSize(): Current screen resolution
-            // Bu size bilgisi olmadan: Scroll coordinates calculate edilemez
-            Dimension size = driver.manage().window().getSize();
-            
-            // Scroll coordinates calculate et
-            // startX: Screen width ortası (horizontal center)
-            // startY: Screen height'in %80'i (bottom area'dan başla)
-            // endY: Screen height'in %20'si (top area'da bitir)
-            int startX = size.width / 2;
-            int startY = (int) (size.height * 0.8);
-            int endY = (int) (size.height * 0.2);
-            
-            // TouchAction ile scroll gesture perform et
-            // TouchAction: Appium native mobile gesture API
-            TouchAction touchAction = new TouchAction(driver);
-            touchAction.press(PointOption.point(startX, startY))  // Start point'e bas
-                      .waitAction(WaitOptions.waitOptions(Duration.ofMillis(1000)))  // 1 saniye wait (smooth scroll)
-                      .moveTo(PointOption.point(startX, endY))  // End point'e taşı
-                      .release()  // Touch release
-                      .perform();  // Gesture'u execute et
-            
-            // Scroll operation completion log'u
-            // Info level: Operation success confirmation
-            logger.info("Scroll down completed");
-            
-        } catch (Exception e) {
-            // Scroll operation exception handling
-            // Error level: Gesture failure, critical for navigation
-            logger.error("Failed to scroll down", e);
-            
-            // RuntimeException wrap: Standardized exception handling
-            // Bu throw olmadan: Scroll failures silent kalabilir
-            throw new RuntimeException("Failed to scroll down", e);
-        }
+        // start: %50x, %80y -> end: %50x, %20y
+        performSwipe(percentPoint(0.5, 0.80), percentPoint(0.5, 0.20), GESTURE_HOLD);
+        logger.info("ScrollDown OK");
     }
-    
-    /**
-     * EKRAN YUKARİ KAYDIRMA METODİ (SCROLL UP)
-     * 
-     * Method amacı: Ekranı yukarı doğru scroll yapar (reverse vertical scrolling)
-     * Parametreler: Parametre almaz (screen size'a göre automatic calculation)
-     * Return değeri: Void (side effect: reverse screen scroll operation)
-     * 
-     * Kullanılmazsa etki:
-     * - Page top content'e geri dönülemez
-     * - Header, navigation elements erişilemez
-     * - Above-fold content'e navigation yapılamaz
-     * - Scroll position correction yapılamaz
-     * 
-     * Scroll Algorithm (scrollDown'un tersi):
-     * - Start point: Screen height'in %20'si (üst kısım)
-     * - End point: Screen height'in %80'i (alt kısım)
-     * - X coordinate: Screen width'in ortası (merkez scroll)
-     * - Duration: 1000ms (smooth scroll effect)
-     * 
-     * Çağrıldığı yerler:
-     * - Page top navigation
-     * - Header elements access
-     * - Scroll position reset
-     * - Content area corrections
-     * 
-     * Reverse Gesture: scrollDown'un opposite direction'u
-     */
-    @Step("Scroll up")
+
+    @Step("Yukarı kaydır (scroll up)")
     protected void scrollUp() {
-        try {
-            // Scroll up operation başlangıç log'u
-            // Info level: User action simulation (reverse scroll)
-            logger.info("Scrolling up");
-            
-            // Screen dimension'larını al (reverse scroll coordinates için)
-            // driver.manage().window().getSize(): Current screen resolution
-            Dimension size = driver.manage().window().getSize();
-            
-            // Reverse scroll coordinates calculate et
-            // startX: Screen width ortası (horizontal center, same as down)
-            // startY: Screen height'in %20'si (top area'dan başla - scrollDown'un tersi)
-            // endY: Screen height'in %80'i (bottom area'da bitir - scrollDown'un tersi)
-            int startX = size.width / 2;
-            int startY = (int) (size.height * 0.2);
-            int endY = (int) (size.height * 0.8);
-            
-            // TouchAction ile reverse scroll gesture perform et
-            // TouchAction: Same API, different coordinates (reverse direction)
-            TouchAction touchAction = new TouchAction(driver);
-            touchAction.press(PointOption.point(startX, startY))  // Top area'dan başla
-                      .waitAction(WaitOptions.waitOptions(Duration.ofMillis(1000)))  // Smooth scroll timing
-                      .moveTo(PointOption.point(startX, endY))  // Bottom area'ya taşı
-                      .release()  // Touch release
-                      .perform();  // Reverse gesture execute
-            
-            // Scroll up operation completion log'u
-            // Info level: Reverse operation success confirmation
-            logger.info("Scroll up completed");
-            
-        } catch (Exception e) {
-            // Scroll up operation exception handling
-            // Error level: Reverse gesture failure
-            logger.error("Failed to scroll up", e);
-            
-            // RuntimeException wrap: Consistent exception handling
-            // Bu throw olmadan: Reverse scroll failures silent
-            throw new RuntimeException("Failed to scroll up", e);
-        }
+        performSwipe(percentPoint(0.5, 0.20), percentPoint(0.5, 0.80), GESTURE_HOLD);
+        logger.info("ScrollUp OK");
     }
-    
-    /**
-     * SOLA KAYDIRMA METODİ (SWIPE LEFT)
-     * 
-     * Method amacı: Ekranı sola doğru swipe yapar (horizontal swiping)
-     * Parametreler: Parametre almaz (screen size'a göre automatic calculation)
-     * Return değeri: Void (side effect: horizontal swipe gesture)
-     * 
-     * Kullanılmazsa etki:
-     * - Carousel, slider navigation yapılamaz
-     * - Tab switching operations eksik
-     * - Image gallery browsing yapılamaz
-     * - Horizontal content navigation blocked
-     * 
-     * Swipe Algorithm:
-     * - Start point: Screen width'in %80'i (sağ kısım)
-     * - End point: Screen width'in %20'si (sol kısım)
-     * - Y coordinate: Screen height'in ortası (vertical center)
-     * - Duration: 1000ms (smooth swipe effect)
-     * 
-     * Çağrıldığı yerler:
-     * - Product image carousels
-     * - Tab navigation (right to left)
-     * - Slider controls
-     * - Horizontal list browsing
-     * 
-     * Horizontal Gesture: Left direction swipe (right to left movement)
-     */
-    @Step("Swipe left")
+
+    @Step("Sola kaydır (swipe left)")
     protected void swipeLeft() {
-        try {
-            // Swipe left operation başlangıç log'u
-            // Info level: Horizontal gesture simulation
-            logger.info("Swiping left");
-            
-            // Screen dimension'larını al (horizontal swipe coordinates için)
-            // driver.manage().window().getSize(): Screen size for calculation
-            Dimension size = driver.manage().window().getSize();
-            
-            // Horizontal swipe coordinates calculate et
-            // startY: Screen height ortası (vertical center)
-            // startX: Screen width'in %80'i (right area'dan başla)
-            // endX: Screen width'in %20'si (left area'da bitir)
-            int startY = size.height / 2;
-            int startX = (int) (size.width * 0.8);
-            int endX = (int) (size.width * 0.2);
-            
-            // TouchAction ile horizontal swipe gesture perform et
-            // TouchAction: Horizontal movement (X koordinat değişimi)
-            TouchAction touchAction = new TouchAction(driver);
-            touchAction.press(PointOption.point(startX, startY))  // Right side'dan başla
-                      .waitAction(WaitOptions.waitOptions(Duration.ofMillis(1000)))  // Smooth swipe timing
-                      .moveTo(PointOption.point(endX, startY))  // Left side'a taşı
-                      .release()  // Touch release
-                      .perform();  // Horizontal gesture execute
-            
-            // Swipe left operation completion log'u
-            // Info level: Horizontal gesture success confirmation
-            logger.info("Swipe left completed");
-            
-        } catch (Exception e) {
-            // Swipe left operation exception handling
-            // Error level: Horizontal gesture failure
-            logger.error("Failed to swipe left", e);
-            
-            // RuntimeException wrap: Consistent gesture exception handling
-            // Bu throw olmadan: Swipe failures silent kalabilir
-            throw new RuntimeException("Failed to swipe left", e);
-        }
+        performSwipe(percentPoint(0.80, 0.5), percentPoint(0.20, 0.5), GESTURE_HOLD);
+        logger.info("SwipeLeft OK");
     }
-    
-    /**
-     * SAĞA KAYDIRMA METODİ (SWIPE RIGHT)
-     * 
-     * Method amacı: Ekranı sağa doğru swipe yapar (reverse horizontal swiping)
-     * Parametreler: Parametre almaz (screen size'a göre automatic calculation)
-     * Return değeri: Void (side effect: reverse horizontal swipe gesture)
-     * 
-     * Kullanılmazsa etki:
-     * - Reverse carousel navigation yapılamaz
-     * - Back tab switching operations eksik
-     * - Previous image gallery browsing blocked
-     * - Reverse horizontal content navigation yapılamaz
-     * 
-     * Swipe Algorithm (swipeLeft'in tersi):
-     * - Start point: Screen width'in %20'si (sol kısım)
-     * - End point: Screen width'in %80'i (sağ kısım)
-     * - Y coordinate: Screen height'in ortası (vertical center)
-     * - Duration: 1000ms (smooth swipe effect)
-     * 
-     * Çağrıldığı yerler:
-     * - Product image carousel reverse
-     * - Tab navigation (left to right)
-     * - Slider reverse controls
-     * - Previous content browsing
-     * 
-     * Reverse Horizontal Gesture: Right direction swipe (left to right movement)
-     */
-    @Step("Swipe right")
+
+    @Step("Sağa kaydır (swipe right)")
     protected void swipeRight() {
-        try {
-            // Swipe right operation başlangıç log'u
-            // Info level: Reverse horizontal gesture simulation
-            logger.info("Swiping right");
-            
-            // Screen dimension'larını al (reverse horizontal swipe için)
-            // driver.manage().window().getSize(): Screen size for reverse calculation
-            Dimension size = driver.manage().window().getSize();
-            
-            // Reverse horizontal swipe coordinates calculate et
-            // startY: Screen height ortası (vertical center, same as left)
-            // startX: Screen width'in %20'si (left area'dan başla - swipeLeft'in tersi)
-            // endX: Screen width'in %80'i (right area'da bitir - swipeLeft'in tersi)
-            int startY = size.height / 2;
-            int startX = (int) (size.width * 0.2);
-            int endX = (int) (size.width * 0.8);
-            
-            // TouchAction ile reverse horizontal swipe gesture perform et
-            // TouchAction: Reverse horizontal movement (opposite X coordinates)
-            TouchAction touchAction = new TouchAction(driver);
-            touchAction.press(PointOption.point(startX, startY))  // Left side'dan başla
-                      .waitAction(WaitOptions.waitOptions(Duration.ofMillis(1000)))  // Smooth reverse timing
-                      .moveTo(PointOption.point(endX, startY))  // Right side'a taşı
-                      .release()  // Touch release
-                      .perform();  // Reverse horizontal gesture execute
-            
-            // Swipe right operation completion log'u
-            // Info level: Reverse horizontal gesture success
-            logger.info("Swipe right completed");
-            
-        } catch (Exception e) {
-            // Swipe right operation exception handling
-            // Error level: Reverse horizontal gesture failure
-            logger.error("Failed to swipe right", e);
-            
-            // RuntimeException wrap: Consistent reverse gesture exception handling
-            // Bu throw olmadan: Reverse swipe failures silent
-            throw new RuntimeException("Failed to swipe right", e);
-        }
+        performSwipe(percentPoint(0.20, 0.5), percentPoint(0.80, 0.5), GESTURE_HOLD);
+        logger.info("SwipeRight OK");
     }
-    
-    /**
-     * KOORDİNAT TABANLI DOKUNMA METODİ (COORDINATE TAP)
-     * 
-     * Method amacı: Belirtilen koordinatlara dokunma gesture'u yapar
-     * Parametreler: x - X koordinatı, y - Y koordinatı (screen pixel coordinates)
-     * Return değeri: Void (side effect: coordinate-based tap gesture)
-     * 
-     * Kullanılmazsa etki:
-     * - Element-based approach çalışmadığında fallback yok
-     * - Fixed position elements (ads, overlays) handle edilemez
-     * - Screen area-based interactions yapılamaz
-     * - Coordinate-dependent operations blocked
-     * 
-     * Coordinate vs Element-based farkı:
-     * - Element-based: WebElement reference gerekli
-     * - Coordinate-based: Direct screen position access
-     * - Use case: WebElement bulunamadığı durumlar
-     * 
-     * Çağrıldığı yerler:
-     * - Ad close buttons (dynamic elements)
-     * - Fixed position overlays
-     * - Screen area interactions
-     * - Element location fallback scenarios
-     * 
-     * Coordinate System: Screen top-left (0,0), bottom-right (width,height)
-     */
-    @Step("Tap on coordinates: ({x}, {y})")
-    protected void tapOnCoordinates(int x, int y) {
-        try {
-            // Coordinate tap operation başlangıç log'u
-            // Info level: Coordinate-based interaction tracking
-            // Parameterized: Actual coordinates gösterir
-            logger.info("Tapping on coordinates: ({}, {})", x, y);
-            
-            // TouchAction ile coordinate tap gesture perform et
-            // TouchAction.tap(): Direct coordinate tap (element-independent)
-            TouchAction touchAction = new TouchAction(driver);
-            touchAction.tap(PointOption.point(x, y)).perform();
-            
-            // Coordinate tap completion log'u
-            // Info level: Coordinate operation success confirmation
-            logger.info("Tap completed on coordinates: ({}, {})", x, y);
-            
-        } catch (Exception e) {
-            // Coordinate tap exception handling
-            // Error level: Coordinate operation failure
-            // Parameterized error: Failed coordinates context
-            logger.error("Failed to tap on coordinates: ({}, {})", x, y, e);
-            
-            // RuntimeException wrap: Consistent coordinate exception handling
-            // Bu throw olmadan: Coordinate tap failures silent
-            throw new RuntimeException("Failed to tap on coordinates", e);
-        }
+
+    @Step("Koordinata dokun (tap): ({x},{y})")
+    protected void tapAt(int x, int y) {
+        PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, "finger1");
+        Sequence seq = new Sequence(finger, 1);
+        seq.addAction(finger.createPointerMove(Duration.ZERO, PointerInput.Origin.viewport(), x, y));
+        seq.addAction(finger.createPointerDown(PointerInput.MouseButton.LEFT.asArg()));
+        seq.addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
+        driver.perform(List.of(seq));
+        logger.info("Tap OK -> ({},{})", x, y);
     }
-    
-    /**
-     * KLAVYE GİZLEME METODİ (PLATFORM-SPECİFİC)
-     * 
-     * Method amacı: Mobile keyboard'ı gizler (Android-specific operation)
-     * Parametreler: Parametre almaz (active keyboard'u detect ve hide eder)
-     * Return değeri: Void (side effect: keyboard hide operation)
-     * 
-     * Kullanılmazsa etki:
-     * - Text input sonrası keyboard açık kalır
-     * - Screen real estate kaybı (keyboard area)
-     * - Element visibility problems (keyboard overlap)
-     * - User experience issues
-     * 
-     * Platform Behavior:
-     * - Android: Explicit hideKeyboard() API available
-     * - iOS: Usually auto-hide, explicit hide less reliable
-     * - Platform check: DriverManager.isAndroid() condition
-     * 
-     * Çağrıldığı yerler:
-     * - Text input completion sonrası
-     * - Form submission öncesi
-     * - Page navigation öncesi screen cleanup
-     * - Element interaction öncesi visibility assurance
-     * 
-     * Exception Handling: Warning level (keyboard absence expected)
-     */
-    @Step("Hide keyboard")
-    protected void hideKeyboard() {
-        try {
-            // Platform check: Sadece Android'de hide keyboard support var
-            // DriverManager.isAndroid(): Platform detection utility
-            if (DriverManager.isAndroid()) {
-                // Keyboard hiding operation başlangıç log'u
-                // Info level: Platform-specific operation tracking
-                logger.info("Hiding keyboard");
-                
-                // AndroidDriver cast ve hideKeyboard() API call
-                // AndroidDriver cast: Platform-specific API access
-                // hideKeyboard(): Android-specific keyboard hide method
-                ((AndroidDriver) driver).hideKeyboard();
-                
-                // Keyboard hiding success log'u
-                // Info level: Platform operation success confirmation
-                logger.info("Keyboard hidden successfully");
-            }
-            // iOS case: No explicit action (iOS auto-hide behavior)
-            
-        } catch (Exception e) {
-            // Keyboard hiding exception handling
-            // Warning level: Keyboard absence normal, not critical error
-            // Bu warning olmadan: Normal keyboard absence logging eksik
-            logger.warn("Failed to hide keyboard or keyboard not present", e);
-            
-            // No throw: Keyboard hiding optional operation, failure tolerable
-            // Bu pattern olmadan: Optional operations critical failure gibi treat edilir
-        }
-    }
-    
-    /**
-     * GERİ NAVİGASYON METODİ (PLATFORM-SPECİFİC)
-     * 
-     * Method amacı: Platform-uygun şekilde geri navigation yapar
-     * Parametreler: Parametre almaz (current platform'a göre appropriate back action)
-     * Return değeri: Void (side effect: back navigation operation)
-     * 
-     * Kullanılmazsa etki:
-     * - Geri navigation yapılamaz
-     * - User back button behavior simulate edilemez
-     * - Page/screen navigation flow broken
-     * - Test scenarios incomplete (forward-only navigation)
-     * 
-     * Platform Behavior:
-     * - Android: Hardware back button simulation
-     * - iOS: Navigation back (app-specific back)
-     * - Cross-platform: Same method, different implementations
-     * 
-     * Çağrıldığı yerler:
-     * - User back button press simulation
-     * - Navigation flow testing
-     * - Page transition validations
-     * - Error scenario recovery
-     * 
-     * Navigation Pattern: Platform detection + appropriate back action
-     */
-    @Step("Navigate back")
+
+    // ---------- Sistem / Navigasyon ----------
+
+
+    @Step("Geri git (navigate back)")
     protected void goBack() {
         try {
-            // Back navigation operation başlangıç log'u
-            // Info level: Navigation action tracking
-            logger.info("Navigating back");
-            
-            // Platform-specific back navigation implementation
-            if (DriverManager.isAndroid()) {
-                // Android: Hardware back button simulation
-                // AndroidDriver cast: Platform-specific navigation API
-                // navigate().back(): Android system back button press
-                ((AndroidDriver) driver).navigate().back();
-                
-            } else if (DriverManager.isIOS()) {
-                // iOS: App-specific back navigation
-                // driver.navigate().back(): iOS navigation back
-                // iOS back navigation implementation (app-dependent)
-                driver.navigate().back();
-            }
-            // Unsupported platform: No action (graceful degradation)
-            
-            // Back navigation completion log'u
-            // Info level: Navigation operation success confirmation
-            logger.info("Back navigation completed");
-            
+            driver.navigate().back();
+            logger.info("Back OK");
         } catch (Exception e) {
-            // Back navigation exception handling
-            // Error level: Navigation failure, critical for flow
-            logger.error("Failed to navigate back", e);
-            
-            // RuntimeException wrap: Navigation failures should be handled
-            // Bu throw olmadan: Navigation failures silent, test flow broken
-            throw new RuntimeException("Failed to navigate back", e);
+            logger.error("Back FAILED", e);
+            throw new RuntimeException("Geri navigasyon başarısız", e);
         }
     }
-    
+
+    // ---------- page Stabilitesi / Beklemeler ----------
     /**
-     * SAYFA YÜKLENME BEKLEME METODİ - ABSTRACT (SUBCLASS IMPLEMENT EDİLECEK)
-     * 
-     * Method amacı: Specific page'ın tamamen yüklenmesini bekler
-     * Implementation: Her page object kendi loading criteria'larını implement eder
-     * Pattern: Template Method Pattern - base structure, specific implementation
-     * 
-     * Subclass responsibility:
-     * - Page-specific loading indicators wait
-     * - Key elements visibility check
-     * - Page ready state validation
-     * - Loading completion criteria definition
-     * 
-     * Çağrıldığı yerler:
-     * - Page navigation sonrası readiness assurance
-     * - Page object initialization
-     * - Test step başlangıcında page ready guarantee
+     * Basit stabilite beklemesi: pageSource değişmiyorsa “stabil” kabul eder.
+     * Dinamik yüklemeler için genel bir emniyet sübabıdır.
      */
-    public abstract void waitForPageToLoad();
-    
+    @Step("pagenın stabil hale gelmesini bekle (max {timeoutSeconds} sn)")
+    protected boolean waitForPageToBeStable(int timeoutSeconds, int stableWindowMillis) {
+        long end = System.currentTimeMillis() + timeoutSeconds * 1000L;
+        String last = "";
+        long stableStart = -1;
+
+        while (System.currentTimeMillis() < end) {
+            String now = driver.getPageSource();
+            if (now.equals(last)) {
+                if (stableStart < 0) {
+                    stableStart = System.currentTimeMillis();
+                } else if (System.currentTimeMillis() - stableStart >= stableWindowMillis) {
+                    logger.info("Page became stable ({} ms window).", stableWindowMillis);
+                    return true;
+                }
+            } else {
+                stableStart = -1; // değişti, pencereyi sıfırla
+                last = now;
+            }
+            try { Thread.sleep(150); } catch (InterruptedException ignored) {}
+        }
+        logger.warn("Page stability timeout ({} s).", timeoutSeconds);
+        return false;
+    }
+
+    @Step("Sabit süre bekle: {millis} ms")
+    protected void waitMillis(long millis) {
+        try { Thread.sleep(millis); } catch (InterruptedException ignored) {}
+    }
+
+    // ---------- Yardımcı ----------
     /**
-     * SAYFA YÜKLENME DOĞRULAMA METODİ - ABSTRACT (SUBCLASS IMPLEMENT EDİLECEK)
-     * 
-     * Method amacı: Specific page'ın loaded state'ini validate eder
-     * Return değeri: boolean - true: page loaded, false: page not ready
-     * Implementation: Her page object kendi validation criteria'larını define eder
-     * 
-     * Subclass responsibility:
-     * - Key element presence validation
-     * - Page state verification
-     * - Loading completion confirmation
-     * - Error state detection
-     * 
-     * Çağrıldığı yerler:
-     * - Page readiness checks
-     * - Test assertions (page load verification)
-     * - Conditional page operations
-     * - Error handling scenarios
+     * WebElement’i logta tanımlamak için güvenli bir temsil (stale durumlarda patlamasın).
      */
-    public abstract boolean isPageLoaded();
-    
-    /**
-     * SAYFA TITLE ALMA METODİ - ABSTRACT (SUBCLASS IMPLEMENT EDİLECEK)
-     * 
-     * Method amacı: Specific page'ın title/identifier'ini return eder
-     * Return değeri: String - Page title, name, or identifier
-     * Implementation: Her page object kendi title logic'ini implement eder
-     * 
-     * Subclass responsibility:
-     * - Page-specific title extraction
-     * - Page identification logic
-     * - Title element access
-     * - Fallback title handling
-     * 
-     * Çağrıldığı yerler:
-     * - Page identification assertions
-     * - Test reporting (current page info)
-     * - Navigation validation
-     * - Page state logging
-     */
-    public abstract String getPageTitle();
-    
-    // BASE PAGE SON - TÜM PAGE OBJECT'LER İÇİN ORTAK FONKSİYONALİTE HAZIR
-    // Bu class mobile test automation için comprehensive page object foundation sağlar
-    // Element interactions, mobile gestures, platform-specific operations içerir
+    private String safeLocator(WebElement element) {
+        try {
+            return element.toString();
+        } catch (Exception e) {
+            return "#webelement";
+        }
+    }
 }
