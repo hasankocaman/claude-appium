@@ -16,17 +16,14 @@ public class CategoriesPage extends BasePage {
     @iOSXCUITFindBy(id = "categoriesTitle")
     private WebElement categoriesTitle;
     
-    @Override
     public void waitForPageToLoad() {
-        waitForElementToBeVisible(categoriesTitle);
+        waitVisible(categoriesTitle);
     }
     
-    @Override
     public boolean isPageLoaded() {
-        return isElementDisplayed(categoriesTitle);
+        return isDisplayed(categoriesTitle);
     }
     
-    @Override
     public String getPageTitle() {
         return "Hepsiburada - Categories";
     }

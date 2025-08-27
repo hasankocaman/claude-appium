@@ -16,17 +16,16 @@ public class AccountPage extends BasePage {
     @iOSXCUITFindBy(id = "accountTitle")
     private WebElement accountTitle;
     
-    @Override
     public void waitForPageToLoad() {
-        waitForElementToBeVisible(accountTitle);
+        waitVisible(accountTitle);
     }
     
-    @Override
+    
     public boolean isPageLoaded() {
-        return isElementDisplayed(accountTitle);
+        return isDisplayed(accountTitle);
     }
     
-    @Override
+    
     public String getPageTitle() {
         return "Hepsiburada - Account";
     }

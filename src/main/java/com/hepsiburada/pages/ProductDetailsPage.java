@@ -144,15 +144,14 @@ public class ProductDetailsPage extends BasePage {
     /**
      * Wait for product details page to load
      */
-    @Override
     @Step("Wait for product details page to load")
     public void waitForPageToLoad() {
         logger.info("Waiting for product details page to load");
         
         try {
-            waitForElementToBeVisible(productTitle);
-            waitForElementToBeVisible(productPrice);
-            waitForElementToBeVisible(addToCartButton);
+            waitVisible(productTitle);
+            waitVisible(productPrice);
+            waitVisible(addToCartButton);
             
             logger.info("Product details page loaded successfully");
         } catch (Exception e) {
@@ -165,15 +164,15 @@ public class ProductDetailsPage extends BasePage {
      * Check if product details page is loaded
      * @return true if page is loaded
      */
-    @Override
+    
     @Step("Verify product details page is loaded")
     public boolean isPageLoaded() {
         logger.info("Verifying product details page is loaded");
         
         try {
-            return isElementDisplayed(productTitle) && 
-                   isElementDisplayed(productPrice) &&
-                   isElementDisplayed(addToCartButton);
+            return isDisplayed(productTitle) && 
+                   isDisplayed(productPrice) &&
+                   isDisplayed(addToCartButton);
         } catch (Exception e) {
             logger.error("Error verifying product details page load status", e);
             return false;
@@ -184,7 +183,7 @@ public class ProductDetailsPage extends BasePage {
      * Get page title
      * @return Page title
      */
-    @Override
+    
     @Step("Get product details page title")
     public String getPageTitle() {
         return "Hepsiburada - Product Details";
@@ -199,7 +198,7 @@ public class ProductDetailsPage extends BasePage {
         logger.info("Getting product title");
         
         try {
-            String title = getElementText(productTitle);
+            String title = getText(productTitle);
             logger.info("Product title: {}", title);
             return title;
         } catch (Exception e) {
@@ -217,7 +216,7 @@ public class ProductDetailsPage extends BasePage {
         logger.info("Getting product price");
         
         try {
-            String price = getElementText(productPrice);
+            String price = getText(productPrice);
             logger.info("Product price: {}", price);
             return price;
         } catch (Exception e) {
@@ -235,8 +234,8 @@ public class ProductDetailsPage extends BasePage {
         logger.info("Getting brand name");
         
         try {
-            if (isElementDisplayed(brandName)) {
-                String brand = getElementText(brandName);
+            if (isDisplayed(brandName)) {
+                String brand = getText(brandName);
                 logger.info("Brand name: {}", brand);
                 return brand;
             }
@@ -260,25 +259,25 @@ public class ProductDetailsPage extends BasePage {
             scrollToElement(addToCartButton);
             
             // Click add to cart button
-            clickElement(addToCartButton);
+            click(addToCartButton);
             
             // Wait for success message or navigation
             Thread.sleep(2000);
             
             // Check for success message
-            if (isElementDisplayed(addToCartSuccessMessage)) {
-                String successMessage = getElementText(addToCartSuccessMessage);
+            if (isDisplayed(addToCartSuccessMessage)) {
+                String successMessage = getText(addToCartSuccessMessage);
                 logger.info("Product added to cart successfully: {}", successMessage);
-            } else if (isElementDisplayed(snackbarMessage)) {
-                String successMessage = getElementText(snackbarMessage);
+            } else if (isDisplayed(snackbarMessage)) {
+                String successMessage = getText(snackbarMessage);
                 logger.info("Product added to cart with message: {}", successMessage);
             }
             
             logger.info("Product successfully added to cart");
             
             // Navigate to cart if cart button is available
-            if (isElementDisplayed(cartButton)) {
-                clickElement(cartButton);
+            if (isDisplayed(cartButton)) {
+                click(cartButton);
                 return new CartPage();
             }
             
@@ -298,7 +297,7 @@ public class ProductDetailsPage extends BasePage {
         logger.info("Adding product to favorites");
         
         try {
-            clickElement(addToFavoritesButton);
+            click(addToFavoritesButton);
             
             // Wait for confirmation
             Thread.sleep(1000);
@@ -318,8 +317,8 @@ public class ProductDetailsPage extends BasePage {
         logger.info("Increasing product quantity");
         
         try {
-            if (isElementDisplayed(increaseQuantityButton)) {
-                clickElement(increaseQuantityButton);
+            if (isDisplayed(increaseQuantityButton)) {
+                click(increaseQuantityButton);
                 logger.info("Quantity increased successfully");
             }
         } catch (Exception e) {
@@ -335,8 +334,8 @@ public class ProductDetailsPage extends BasePage {
         logger.info("Decreasing product quantity");
         
         try {
-            if (isElementDisplayed(decreaseQuantityButton)) {
-                clickElement(decreaseQuantityButton);
+            if (isDisplayed(decreaseQuantityButton)) {
+                click(decreaseQuantityButton);
                 logger.info("Quantity decreased successfully");
             }
         } catch (Exception e) {
@@ -353,8 +352,8 @@ public class ProductDetailsPage extends BasePage {
         logger.info("Getting current quantity");
         
         try {
-            if (isElementDisplayed(quantityText)) {
-                String quantity = getElementText(quantityText);
+            if (isDisplayed(quantityText)) {
+                String quantity = getText(quantityText);
                 logger.info("Current quantity: {}", quantity);
                 return quantity;
             }
@@ -393,9 +392,9 @@ public class ProductDetailsPage extends BasePage {
         logger.info("Verifying product details are displayed");
         
         try {
-            boolean titleDisplayed = isElementDisplayed(productTitle);
-            boolean priceDisplayed = isElementDisplayed(productPrice);
-            boolean buttonDisplayed = isElementDisplayed(addToCartButton);
+            boolean titleDisplayed = isDisplayed(productTitle);
+            boolean priceDisplayed = isDisplayed(productPrice);
+            boolean buttonDisplayed = isDisplayed(addToCartButton);
             
             boolean allDisplayed = titleDisplayed && priceDisplayed && buttonDisplayed;
             logger.info("Product details displayed - Title: {}, Price: {}, Button: {}, All: {}", 
@@ -418,13 +417,13 @@ public class ProductDetailsPage extends BasePage {
             int maxScrollAttempts = 5;
             int scrollAttempts = 0;
             
-            while (!isElementDisplayed(element) && scrollAttempts < maxScrollAttempts) {
+            while (!isDisplayed(element) && scrollAttempts < maxScrollAttempts) {
                 scrollDown();
                 scrollAttempts++;
                 Thread.sleep(1000);
             }
             
-            if (!isElementDisplayed(element)) {
+            if (!isDisplayed(element)) {
                 logger.warn("Element not visible after {} scroll attempts", maxScrollAttempts);
             }
         } catch (Exception e) {
@@ -440,8 +439,8 @@ public class ProductDetailsPage extends BasePage {
         logger.info("Navigating back to previous page");
         
         try {
-            if (isElementDisplayed(backButton)) {
-                clickElement(backButton);
+            if (isDisplayed(backButton)) {
+                click(backButton);
             } else {
                 goBack();
             }

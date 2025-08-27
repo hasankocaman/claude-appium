@@ -212,7 +212,6 @@ public class HomePage extends BasePage {
      * 
      * Exception handling: Implicit waits ve element visibility checks
      */
-    @Override
     @Step("Wait for home page to load")
     public void waitForPageToLoad() {
         // Home page loading başlangıç log'u
@@ -232,9 +231,9 @@ public class HomePage extends BasePage {
         // Core page elements visibility validation
         // Logo: Primary page load indicator (branding element)
         // Search box: Key functional element availability
-        // waitForElementToBeVisible(): BasePage wait utility
-        waitForElementToBeVisible(hepsiburadaLogo);
-        waitForElementToBeVisible(searchBox);
+        // waitVisible(): BasePage wait utility
+        waitVisible(hepsiburadaLogo);
+        waitVisible(searchBox);
         
         // Home page loading completion log'u
         // Info level: Page ready confirmation
@@ -267,7 +266,7 @@ public class HomePage extends BasePage {
      * 
      * Exception Safety: Try-catch ile graceful failure handling
      */
-    @Override
+    
     @Step("Verify home page is loaded")
     public boolean isPageLoaded() {
         // Home page validation başlangıç log'u
@@ -280,9 +279,9 @@ public class HomePage extends BasePage {
             // Search box: Core functionality availability
             // Home tab: Navigation system status
             // Logical AND: Tüm criteria pass etmeli
-            boolean isLoaded = isElementDisplayed(hepsiburadaLogo) && 
-                              isElementDisplayed(searchBox) &&
-                              isElementDisplayed(homeTab);
+            boolean isLoaded = isDisplayed(hepsiburadaLogo) && 
+                              isDisplayed(searchBox) &&
+                              isDisplayed(homeTab);
             
             // Validation result log'u (debugging için important)
             // Info level: Validation outcome visibility
@@ -308,7 +307,7 @@ public class HomePage extends BasePage {
      * Get page title
      * @return Page title
      */
-    @Override
+    
     @Step("Get home page title")
     public String getPageTitle() {
         return "Hepsiburada - Home";
@@ -355,20 +354,20 @@ public class HomePage extends BasePage {
         
         try {
             // Search box activation (element focus için click)
-            // clickElement(): BasePage utility, safe click with wait
+            // click(): BasePage utility, safe click with wait
             // Bu click olmadan: Search box focus olmaz, text input fails
-            clickElement(searchBox);
+            click(searchBox);
             
             // Search term text input
-            // enterText(): BasePage utility, clear + type pattern
+            // type(): BasePage utility, clear + type pattern
             // Bu text input olmadan: Search query girilmez, empty search
-            enterText(searchBox, searchTerm);
+            type(searchBox, searchTerm);
             
             // Search trigger action (search icon click)
-            // clickElement(): Search execution trigger
+            // click(): Search execution trigger
             // Alternative: Enter key press, ama click more reliable
             // Bu trigger olmadan: Search query execute edilmez
-            clickElement(searchIcon);
+            click(searchIcon);
             
             // Search initiation confirmation log'u
             // Info level: Search operation success confirmation
@@ -427,9 +426,9 @@ public class HomePage extends BasePage {
         
         try {
             // Categories tab click action
-            // clickElement(): BasePage safe click utility
+            // click(): BasePage safe click utility
             // Bu click olmadan: Categories page'e transition yapılamaz
-            clickElement(categoriesTab);
+            click(categoriesTab);
             
             // Navigation success confirmation log'u
             // Info level: Successful navigation tracking
@@ -492,9 +491,9 @@ public class HomePage extends BasePage {
         
         try {
             // Cart tab click action
-            // clickElement(): BasePage safe interaction
+            // click(): BasePage safe interaction
             // Bu click olmadan: Shopping cart access yapılamaz
-            clickElement(cartTab);
+            click(cartTab);
             
             // Cart navigation success log'u
             // Info level: Critical transaction operation success
@@ -559,9 +558,9 @@ public class HomePage extends BasePage {
         
         try {
             // Account tab click action
-            // clickElement(): BasePage secure interaction
+            // click(): BasePage secure interaction
             // Bu click olmadan: User account access yapılamaz
-            clickElement(accountTab);
+            click(accountTab);
             
             // Account navigation success log'u
             // Info level: User profile access confirmation
@@ -613,16 +612,16 @@ public class HomePage extends BasePage {
      * - UI state assertion tests
      * - Page readiness conditional logic
      * 
-     * Thread Safety: isElementDisplayed() BasePage utility'den inherited
+     * Thread Safety: isDisplayed() BasePage utility'den inherited
      * 
      * @return boolean - Search box visibility status (true=visible, false=hidden)
      */
     @Step("Check if search box is displayed")
     public boolean isSearchBoxDisplayed() {
         // Search box visibility check
-        // isElementDisplayed(): BasePage utility, safe visibility check
+        // isDisplayed(): BasePage utility, safe visibility check
         // Bu return olmadan: Calling code search box state bilemez
-        return isElementDisplayed(searchBox);
+        return isDisplayed(searchBox);
     }
     
     /**
@@ -663,9 +662,9 @@ public class HomePage extends BasePage {
     @Step("Check if main banner is displayed")
     public boolean isMainBannerDisplayed() {
         // Main banner visibility check
-        // isElementDisplayed(): BasePage utility, promotional content check
+        // isDisplayed(): BasePage utility, promotional content check
         // Bu return olmadan: Banner content validation yapılamaz
-        return isElementDisplayed(mainBanner);
+        return isDisplayed(mainBanner);
     }
     
     /**
@@ -707,9 +706,9 @@ public class HomePage extends BasePage {
     @Step("Check if categories grid is displayed")
     public boolean isCategoriesGridDisplayed() {
         // Categories grid visibility check
-        // isElementDisplayed(): BasePage utility, structural content validation
+        // isDisplayed(): BasePage utility, structural content validation
         // Bu return olmadan: Category structure validation yapılamaz
-        return isElementDisplayed(categoriesGrid);
+        return isDisplayed(categoriesGrid);
     }
     
     /**
@@ -758,17 +757,17 @@ public class HomePage extends BasePage {
             Thread.sleep(2000);
             
             // Permission dialog presence check
-            // isElementDisplayed(): Safe element detection
+            // isDisplayed(): Safe element detection
             // allowPermissionButton: Android system permission approval button
-            if (isElementDisplayed(allowPermissionButton)) {
+            if (isDisplayed(allowPermissionButton)) {
                 // Permission dialog detection log'u
                 // Info level: Permission dialog found, action needed
                 logger.info("Permission dialog detected, granting permissions");
                 
                 // Permission approval action
-                // clickElement(): BasePage safe click utility
+                // click(): BasePage safe click utility
                 // Bu click olmadan: Permission dialog resolved olmaz, test blocked
-                clickElement(allowPermissionButton);
+                click(allowPermissionButton);
                 
                 // Permission grant success log'u
                 // Info level: Permission handling completion
@@ -832,17 +831,17 @@ public class HomePage extends BasePage {
             Thread.sleep(2000);
             
             // Skip onboarding option check (preferred path)
-            // isElementDisplayed(): Safe element detection
+            // isDisplayed(): Safe element detection
             // skipOnboardingButton: Fastest bypass to main app
-            if (isElementDisplayed(skipOnboardingButton)) {
+            if (isDisplayed(skipOnboardingButton)) {
                 // Skip onboarding detection log'u
                 // Info level: Skip option found, bypassing onboarding
                 logger.info("Onboarding screen detected, skipping");
                 
                 // Skip onboarding action
-                // clickElement(): BasePage safe interaction
+                // click(): BasePage safe interaction
                 // Bu click olmadan: Onboarding bypass yapılamaz
-                clickElement(skipOnboardingButton);
+                click(skipOnboardingButton);
                 
                 // Skip completion log'u
                 // Info level: Onboarding bypass success
@@ -850,15 +849,15 @@ public class HomePage extends BasePage {
                 
             // Alternative: Get Started option check
             // getStartedButton: Complete onboarding alternative
-            } else if (isElementDisplayed(getStartedButton)) {
+            } else if (isDisplayed(getStartedButton)) {
                 // Get started detection log'u
                 // Info level: Alternative onboarding completion path
                 logger.info("Get started button detected, clicking");
                 
                 // Get started action
-                // clickElement(): Onboarding completion trigger
+                // click(): Onboarding completion trigger
                 // Bu click olmadan: Onboarding complete olmaz
-                clickElement(getStartedButton);
+                click(getStartedButton);
                 
                 // Get started completion log'u
                 // Info level: Onboarding completion success
@@ -888,7 +887,7 @@ public class HomePage extends BasePage {
      * Scroll Strategy Components:
      * - Target element: popularProductsList (destination)
      * - Scroll mechanism: scrollDown() (BasePage utility)
-     * - Visibility detection: isElementDisplayed() (success criteria)
+     * - Visibility detection: isDisplayed() (success criteria)
      * - Attempt limiting: maxScrollAttempts (infinite loop prevention)
      * - Timing control: Thread.sleep() (scroll completion wait)
      * 
@@ -926,10 +925,10 @@ public class HomePage extends BasePage {
             int scrollAttempts = 0;
             
             // Iterative scroll loop - target element visibility check
-            // Condition 1: !isElementDisplayed(popularProductsList) - Target not visible yet
+            // Condition 1: !isDisplayed(popularProductsList) - Target not visible yet
             // Condition 2: scrollAttempts < maxScrollAttempts - Attempt limit protection
             // Logical AND: Both conditions must be true to continue scrolling
-            while (!isElementDisplayed(popularProductsList) && scrollAttempts < maxScrollAttempts) {
+            while (!isDisplayed(popularProductsList) && scrollAttempts < maxScrollAttempts) {
                 // Scroll down operation
                 // scrollDown(): BasePage mobile gesture utility
                 // Bu scroll olmadan: Target element viewport'a gelmiyor
@@ -947,8 +946,8 @@ public class HomePage extends BasePage {
             }
             
             // Scroll success validation
-            // isElementDisplayed(): Final target visibility check
-            if (isElementDisplayed(popularProductsList)) {
+            // isDisplayed(): Final target visibility check
+            if (isDisplayed(popularProductsList)) {
                 // Scroll success log'u
                 // Info level: Target reached successfully
                 logger.info("Popular products section is now visible");

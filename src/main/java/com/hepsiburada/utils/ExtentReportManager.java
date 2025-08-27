@@ -551,20 +551,18 @@ public final class ExtentReportManager {
      * @return CSS string
      */
     private static String getCustomCSS() {
-        return """
-            .brand-logo { 
-                color: #FF6600 !important; 
-            }
-            .nav-wrapper { 
-                background-color: #FF6600 !important; 
-            }
-            .test-node-name { 
-                font-weight: bold; 
-            }
-            .step-details { 
-                margin-left: 20px; 
-            }
-            """;
+        return ".brand-logo { " +
+                "color: #FF6600 !important; " +
+                "} " +
+                ".nav-wrapper { " +
+                "background-color: #FF6600 !important; " +
+                "} " +
+                ".test-node-name { " +
+                "font-weight: bold; " +
+                "} " +
+                ".step-details { " +
+                "margin-left: 20px; " +
+                "}";
     }
     
     /**
@@ -572,12 +570,10 @@ public final class ExtentReportManager {
      * @return JavaScript string
      */
     private static String getCustomJS() {
-        return """
-            // Custom JavaScript for enhanced functionality
-            $(document).ready(function() {
-                // Add custom behavior here
-                console.log('Hepsiburada Mobile Test Report Loaded');
-            });
-            """;
+        return "// Custom JavaScript for enhanced functionality\n" +
+                "$(document).ready(function() {\n" +
+                "    // Add custom behavior here\n" +
+                "    console.log('Hepsiburada Mobile Test Report Loaded');\n" +
+                "});\n";
     }
 }

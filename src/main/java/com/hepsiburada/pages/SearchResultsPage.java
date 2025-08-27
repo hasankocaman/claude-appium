@@ -93,23 +93,22 @@ public class SearchResultsPage extends BasePage {
     /**
      * Wait for search results page to load
      */
-    @Override
     @Step("Wait for search results page to load")
     public void waitForPageToLoad() {
         logger.info("Waiting for search results page to load");
         
         try {
             // Wait for loading to finish if present
-            if (isElementDisplayed(loadingIndicator)) {
-                waitForElementToDisappear(loadingIndicator);
+            if (isDisplayed(loadingIndicator)) {
+                waitInvisible(loadingIndicator);
             }
             
             // Wait for either results list or no results message
-            if (isElementDisplayed(searchResultsList)) {
-                waitForElementToBeVisible(searchResultsList);
+            if (isDisplayed(searchResultsList)) {
+                waitVisible(searchResultsList);
                 logger.info("Search results loaded successfully");
-            } else if (isElementDisplayed(noResultsMessage)) {
-                waitForElementToBeVisible(noResultsMessage);
+            } else if (isDisplayed(noResultsMessage)) {
+                waitVisible(noResultsMessage);
                 logger.info("No results message displayed");
             }
             
@@ -123,13 +122,13 @@ public class SearchResultsPage extends BasePage {
      * Check if search results page is loaded
      * @return true if page is loaded
      */
-    @Override
+    
     @Step("Verify search results page is loaded")
     public boolean isPageLoaded() {
         logger.info("Verifying search results page is loaded");
         
         try {
-            return isElementDisplayed(searchResultsList) || isElementDisplayed(noResultsMessage);
+            return isDisplayed(searchResultsList) || isDisplayed(noResultsMessage);
         } catch (Exception e) {
             logger.error("Error verifying search results page load status", e);
             return false;
@@ -140,7 +139,7 @@ public class SearchResultsPage extends BasePage {
      * Get page title
      * @return Page title
      */
-    @Override
+    
     @Step("Get search results page title")
     public String getPageTitle() {
         return "Hepsiburada - Search Results";
@@ -155,8 +154,8 @@ public class SearchResultsPage extends BasePage {
         logger.info("Getting search results count");
         
         try {
-            if (isElementDisplayed(resultsCountText)) {
-                String countText = getElementText(resultsCountText);
+            if (isDisplayed(resultsCountText)) {
+                String countText = getText(resultsCountText);
                 // Extract number from text (assuming format like "1-24 of 1000 results")
                 String[] parts = countText.split(" ");
                 for (String part : parts) {
@@ -188,8 +187,8 @@ public class SearchResultsPage extends BasePage {
         logger.info("Sorting results by highest price");
         
         try {
-            clickElement(sortButton);
-            clickElement(sortByHighestPrice);
+            click(sortButton);
+            click(sortByHighestPrice);
             
             // Wait for results to refresh
             Thread.sleep(2000);
@@ -211,8 +210,8 @@ public class SearchResultsPage extends BasePage {
         logger.info("Sorting results by lowest price");
         
         try {
-            clickElement(sortButton);
-            clickElement(sortByLowestPrice);
+            click(sortButton);
+            click(sortByLowestPrice);
             
             // Wait for results to refresh
             Thread.sleep(2000);
@@ -247,11 +246,11 @@ public class SearchResultsPage extends BasePage {
                     throw new RuntimeException("No MacBook products found in search results");
                 } else {
                     // Click on first MacBook product (should be most expensive after sorting)
-                    clickElement(macBookProducts.get(0));
+                    click(macBookProducts.get(0));
                 }
             } else {
                 // Click on first MacBook Pro product (should be most expensive after sorting)
-                clickElement(macBookProProducts.get(0));
+                click(macBookProProducts.get(0));
             }
             
             logger.info("Successfully clicked on most expensive MacBook Pro");
@@ -274,7 +273,7 @@ public class SearchResultsPage extends BasePage {
         
         try {
             if (index >= 0 && index < productTitleElements.size()) {
-                clickElement(productTitleElements.get(index));
+                click(productTitleElements.get(index));
                 logger.info("Successfully selected product at index: {}", index);
                 return new ProductDetailsPage();
             } else {
@@ -297,7 +296,7 @@ public class SearchResultsPage extends BasePage {
         
         try {
             if (index >= 0 && index < productTitleElements.size()) {
-                String title = getElementText(productTitleElements.get(index));
+                String title = getText(productTitleElements.get(index));
                 logger.info("Product title at index {}: {}", index, title);
                 return title;
             } else {
@@ -320,7 +319,7 @@ public class SearchResultsPage extends BasePage {
         
         try {
             if (index >= 0 && index < productPriceElements.size()) {
-                String price = getElementText(productPriceElements.get(index));
+                String price = getText(productPriceElements.get(index));
                 logger.info("Product price at index {}: {}", index, price);
                 return price;
             } else {

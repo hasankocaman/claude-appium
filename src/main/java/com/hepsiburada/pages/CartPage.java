@@ -128,20 +128,19 @@ public class CartPage extends BasePage {
     /**
      * Wait for cart page to load
      */
-    @Override
     @Step("Wait for cart page to load")
     public void waitForPageToLoad() {
         logger.info("Waiting for cart page to load");
         
         try {
             // Wait for cart title to be visible
-            waitForElementToBeVisible(cartTitle);
+            waitVisible(cartTitle);
             
             // Check if cart is empty or has items
-            if (isElementDisplayed(emptyCartMessage)) {
+            if (isDisplayed(emptyCartMessage)) {
                 logger.info("Cart is empty - empty cart message displayed");
             } else {
-                waitForElementToBeVisible(cartItemsList);
+                waitVisible(cartItemsList);
                 logger.info("Cart has items - cart items list displayed");
             }
             
@@ -156,13 +155,13 @@ public class CartPage extends BasePage {
      * Check if cart page is loaded
      * @return true if page is loaded
      */
-    @Override
+    
     @Step("Verify cart page is loaded")
     public boolean isPageLoaded() {
         logger.info("Verifying cart page is loaded");
         
         try {
-            return isElementDisplayed(cartTitle);
+            return isDisplayed(cartTitle);
         } catch (Exception e) {
             logger.error("Error verifying cart page load status", e);
             return false;
@@ -173,7 +172,7 @@ public class CartPage extends BasePage {
      * Get page title
      * @return Page title
      */
-    @Override
+    
     @Step("Get cart page title")
     public String getPageTitle() {
         return "Hepsiburada - Shopping Cart";
@@ -188,7 +187,7 @@ public class CartPage extends BasePage {
         logger.info("Checking if cart is empty");
         
         try {
-            boolean isEmpty = isElementDisplayed(emptyCartMessage) || cartItems.isEmpty();
+            boolean isEmpty = isDisplayed(emptyCartMessage) || cartItems.isEmpty();
             logger.info("Cart empty status: {}", isEmpty);
             return isEmpty;
         } catch (Exception e) {
@@ -231,7 +230,7 @@ public class CartPage extends BasePage {
         
         try {
             if (index >= 0 && index < cartItemTitles.size()) {
-                String title = getElementText(cartItemTitles.get(index));
+                String title = getText(cartItemTitles.get(index));
                 logger.info("Cart item title at index {}: {}", index, title);
                 return title;
             } else {
@@ -254,7 +253,7 @@ public class CartPage extends BasePage {
         
         try {
             if (index >= 0 && index < cartItemPrices.size()) {
-                String price = getElementText(cartItemPrices.get(index));
+                String price = getText(cartItemPrices.get(index));
                 logger.info("Cart item price at index {}: {}", index, price);
                 return price;
             } else {
@@ -275,8 +274,8 @@ public class CartPage extends BasePage {
         logger.info("Getting total amount");
         
         try {
-            if (isElementDisplayed(totalAmountText)) {
-                String total = getElementText(totalAmountText);
+            if (isDisplayed(totalAmountText)) {
+                String total = getText(totalAmountText);
                 logger.info("Total amount: {}", total);
                 return total;
             }
@@ -336,7 +335,7 @@ public class CartPage extends BasePage {
         
         try {
             if (!increaseQuantityButtons.isEmpty()) {
-                clickElement(increaseQuantityButtons.get(0));
+                click(increaseQuantityButtons.get(0));
                 
                 // Wait for update
                 Thread.sleep(1000);
@@ -359,7 +358,7 @@ public class CartPage extends BasePage {
         
         try {
             if (!decreaseQuantityButtons.isEmpty()) {
-                clickElement(decreaseQuantityButtons.get(0));
+                click(decreaseQuantityButtons.get(0));
                 
                 // Wait for update
                 Thread.sleep(1000);
@@ -382,7 +381,7 @@ public class CartPage extends BasePage {
         
         try {
             if (!removeItemButtons.isEmpty()) {
-                clickElement(removeItemButtons.get(0));
+                click(removeItemButtons.get(0));
                 
                 // Wait for removal to complete
                 Thread.sleep(2000);
@@ -411,7 +410,7 @@ public class CartPage extends BasePage {
             // Scroll to checkout button if needed
             scrollToElement(checkoutButton);
             
-            clickElement(checkoutButton);
+            click(checkoutButton);
             
             // Wait for navigation
             Thread.sleep(2000);
@@ -433,10 +432,10 @@ public class CartPage extends BasePage {
         logger.info("Continuing shopping");
         
         try {
-            if (isElementDisplayed(continueShoppingButton)) {
-                clickElement(continueShoppingButton);
-            } else if (isElementDisplayed(startShoppingButton)) {
-                clickElement(startShoppingButton);
+            if (isDisplayed(continueShoppingButton)) {
+                click(continueShoppingButton);
+            } else if (isDisplayed(startShoppingButton)) {
+                click(startShoppingButton);
             }
             
             logger.info("Successfully navigated to continue shopping");
@@ -461,8 +460,8 @@ public class CartPage extends BasePage {
                 return;
             }
             
-            if (isElementDisplayed(clearCartButton)) {
-                clickElement(clearCartButton);
+            if (isDisplayed(clearCartButton)) {
+                click(clearCartButton);
                 
                 // Wait for cart to clear
                 Thread.sleep(2000);
@@ -486,13 +485,13 @@ public class CartPage extends BasePage {
             int maxScrollAttempts = 3;
             int scrollAttempts = 0;
             
-            while (!isElementDisplayed(element) && scrollAttempts < maxScrollAttempts) {
+            while (!isDisplayed(element) && scrollAttempts < maxScrollAttempts) {
                 scrollDown();
                 scrollAttempts++;
                 Thread.sleep(1000);
             }
             
-            if (!isElementDisplayed(element)) {
+            if (!isDisplayed(element)) {
                 logger.warn("Element not visible after {} scroll attempts", maxScrollAttempts);
             }
         } catch (Exception e) {
@@ -509,8 +508,8 @@ public class CartPage extends BasePage {
         logger.info("Verifying cart functionality");
         
         try {
-            boolean hasTitle = isElementDisplayed(cartTitle);
-            boolean hasItems = !isCartEmpty() || isElementDisplayed(emptyCartMessage);
+            boolean hasTitle = isDisplayed(cartTitle);
+            boolean hasItems = !isCartEmpty() || isDisplayed(emptyCartMessage);
             
             boolean functional = hasTitle && hasItems;
             logger.info("Cart functionality verified: {}", functional);
