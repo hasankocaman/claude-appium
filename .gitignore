@@ -57,3 +57,5 @@ msedgedriver*
 # Local configuration
 *.local.*
 local.properties
+
+src/test/resources/apps/
